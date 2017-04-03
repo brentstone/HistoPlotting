@@ -9,8 +9,10 @@ namespace Drawing {
     newDrawable.drawOpt = "";
     newDrawable.title = "";
     THStack * stack = new THStack;
-    for(int iH = hists.size() -1; iH >=0; --iH){
+//    for(int iH = hists.size() -1; iH >=0; --iH){
+    for(unsigned int iH = 0; iH < hists.size(); ++iH){
       stack->Add(hists[iH],"HIST");
+
     }
     newDrawable.obj = stack;
     newDrawable.totStack = totStack;

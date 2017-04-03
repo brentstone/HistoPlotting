@@ -12,10 +12,12 @@ const int defLineColors[] =
     ,8 //green
     ,5 //yellow
     ,6 //purple
+    ,921 //grey
+    ,633 //dark red
 
 
 };
-const unsigned int nDefLineColors = 6;
+const unsigned int nDefLineColors = 8;
 const int defFillColors[] =
 {
     390 //blue

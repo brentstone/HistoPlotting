@@ -55,7 +55,7 @@ TCanvas * Plotter::draw(bool save, TString printName){
   if(doUnderflow){ for(auto * h : hists) PlotTools::toUnderflow(h); for(auto * h : stackHists) PlotTools::toUnderflow(h);}
   if(doOverflow) { for(auto * h : hists) PlotTools::toOverflow(h); for(auto * h : stackHists) PlotTools::toOverflow(h);}
 
-  TCanvas * c =new TCanvas();
+  TCanvas * c =new TCanvas(printName,printName);
   std::vector<Drawing::Drawable1D> drawables;
   prepHist(drawables);
   Drawing::drawPane(c,drawables,&topStyle,true);
@@ -67,7 +67,7 @@ TCanvas * Plotter::draw(bool save, TString printName){
     topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0]->GetXaxis()->GetTitle() : topStyle.xTitle.Data());
   }
 
-  if(save) c->Write(printName);
+  if(save) c->Print(printName);
   return c;
 }
 
@@ -79,7 +79,7 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
 
   std::vector<Drawing::Drawable1D> ratDrawables;
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
-  TCanvas * c =new TCanvas();
+  TCanvas * c =new TCanvas(printName,printName);
   Drawing::drawPane(c,ratDrawables,&topStyle,true);
 
   topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : topStyle.yTitle.Data());
@@ -104,7 +104,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   topStyle.leg_y2 -= .05;
 
 
-  TCanvas * c =new TCanvas();
+  TCanvas * c =new TCanvas(printName,printName);
   TPad *pad1 = new TPad("pad1", "pad1", 0, 0.33, 1, 1.0);
   pad1->SetBottomMargin(.025); // Upper and lower plot are joined
   pad1->SetTopMargin(.1);

@@ -40,11 +40,11 @@ public:
   void rebin(int n, double * bins);
 
   //Style accessors
-  void setMinMax(double iMin, double iMax) {yAxis_min = iMin; yAxis_max = iMax;}
-  void setBottMinMax(double iMin, double iMax) {yAxisBot_min = iMin; yAxisBot_max = iMax;}
-  void setXTitle(TString title) {xTitle = title;}
-  void setYTitle(TString title) {yTitle = title;}
-  void setYTitleBot(TString title) {yTitleBot = title;}
+  void setMinMax(double iMin, double iMax) {topStyle.yAxis_min = iMin; topStyle.yAxis_max= iMax;}
+  void setBottMinMax(double iMin, double iMax) {botStyle.yAxis_min = iMin; botStyle.yAxis_max= iMax;}
+  void setXTitle(TString title) {topStyle.xTitle = title;}
+  void setYTitle(TString title) {topStyle.yTitle = title;}
+  void setYTitleBot(TString title) {botStyle.yTitle = title;}
 
 
 
@@ -60,18 +60,6 @@ private:
   Drawing::PadStyle topStyle;
   Drawing::PadStyle botStyle;
 
-
-
-  //Axis style
-  TString xTitle ="DEF"; //if DEF use built in
-  TString yTitle = "DEF"; //if DEF use built in
-
-  double yAxis_min =0;
-  double yAxis_max =-1; //if -1 use default
-
-  double yAxisBot_min =0;
-  double yAxisBot_max =-1; //if -1 use default
-  TString yTitleBot = "DEF"; //if DEF use built in
 
 
   TH1 * totStack;

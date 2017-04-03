@@ -34,7 +34,8 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, doubl
   }
   if(stackIDX >= 0){
     const TList * list = ((THStack*)drawables[stackIDX].obj)->GetHists();
-    for(int iH = 0; iH < list->GetSize(); ++iH){
+//    for(int iH = 0; iH < list->GetSize(); ++iH){
+    for(int iH = list->GetSize() -1; iH >=0; --iH){
       legend->AddEntry(list->At(iH),drawables[stackIDX].stackTitles[iH],"f");
     }
   }
