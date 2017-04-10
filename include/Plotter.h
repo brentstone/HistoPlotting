@@ -18,8 +18,9 @@
 class Plotter{
 public:
   enum ErrorType {GAUS,POISSON, BINOM};
-  Plotter() : totStack(0){};
+  Plotter() {};
 
+  void addDrawable(Drawing::Drawable1D& input);
   TH1* addHist(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 3, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
   TH1* addHistLine(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 3){return addHist(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
   TH1* addStackHist(const TH1 * hist, TString title, int fillColor =-1, int fillStyle =1001, int lineColor = 1, int lineWidth =2);
@@ -60,16 +61,9 @@ private:
   Drawing::PadStyle topStyle;
   Drawing::PadStyle botStyle;
 
-
-
-  TH1 * totStack;
-  std::vector<TH1*>    hists;
-  std::vector<TString> histTitles;
-  std::vector<TString> histDrawOptions;
-  std::vector<bool> histDoPoissonErrors;
-
-  std::vector<TH1*>    stackHists;
-  std::vector<TString> stackHistTitles;
+  Drawing::Drawable1D totStack;
+  std::vector<Drawing::Drawable1D> hists;
+  std::vector<Drawing::Drawable1D> stackHists;
 };
 
 

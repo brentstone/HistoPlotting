@@ -2,7 +2,11 @@
 #include "../include/Plotter.h"
 #include "../include/StyleInfo.h"
 #include "../include/PlotTools.h"
-
+void Plotter::addDrawable(Drawing::Drawable1D& input) {
+	Drawing::Drawable1D newDrawable = input;
+	newDrawable.obj = newDrawable.obj->Clone();
+	hists.push_back(newDrawable);
+}
 TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
   TH1* h = (TH1*)hist->Clone();
   //style
@@ -18,24 +22,22 @@ TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineSt
     h->SetMarkerStyle(0);
     h->SetMarkerSize(0);
   }
-
-  hists.push_back(h);
-  histTitles.push_back(title);
   if(drawOption == ""){
     if(drawErrorBars) drawOption = "E1X0 ";
     if(drawMarker) drawOption += "P ";
   }
-  histDrawOptions.push_back(drawOption);
-  histDoPoissonErrors.push_back(poissonErrors);
+  hists.emplace_back(drawOption,title,Drawing::HIST1D,h,poissonErrors);
   return h;
 }
 
 TH1* Plotter::addStackHist(const TH1 * hist, TString title, int fillColor, int fillStyle, int lineColor, int lineWidth){
   TH1* h = (TH1*)hist->Clone();
-
-  if(!totStack) totStack= (TH1*)h->Clone();
-  else totStack->Add(h);
-
+  if(totStack.type == Drawing::NONE){
+	  totStack.obj = (TH1*)h->Clone();
+	  totStack.type = Drawing::HIST1D;
+  } else {
+	  ((TH1*)totStack.obj)->Add(h);
+  }
   //style
   h->SetLineWidth(lineWidth);
   h->SetLineColor(lineColor);
@@ -44,38 +46,30 @@ TH1* Plotter::addStackHist(const TH1 * hist, TString title, int fillColor, int f
   h->SetFillColor(fillColor >= 0 ? fillColor : StyleInfo::getFillColor(stackHists.size()));
   h->SetFillStyle(fillStyle);
 
-  stackHists.push_back(h);
-  stackHistTitles.push_back(title);
+  stackHists.emplace_back("",title,Drawing::HIST1D,h,false);
   return h;
 }
 
 TCanvas * Plotter::draw(bool save, TString printName){
-  if(hists.size() == 0 && stackHists.size() == 0) return 0;
+	if(hists.size() == 0 && stackHists.size() == 0) return 0;
 
-  if(doUnderflow){ for(auto * h : hists) PlotTools::toUnderflow(h); for(auto * h : stackHists) PlotTools::toUnderflow(h);}
-  if(doOverflow) { for(auto * h : hists) PlotTools::toOverflow(h); for(auto * h : stackHists) PlotTools::toOverflow(h);}
-
-  TCanvas * c =new TCanvas(printName,printName);
-  std::vector<Drawing::Drawable1D> drawables;
-  prepHist(drawables);
-  Drawing::drawPane(c,drawables,&topStyle,true);
-  if(stackHists.size()){
-    topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? stackHists[0]->GetYaxis()->GetTitle() : topStyle.yTitle.Data());
-    topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0]->GetXaxis()->GetTitle() : topStyle.xTitle.Data());
-  } else {
-    topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? hists[0]->GetYaxis()->GetTitle() : topStyle.yTitle.Data());
-    topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0]->GetXaxis()->GetTitle() : topStyle.xTitle.Data());
-  }
-
-  if(save) c->Print(printName);
-  return c;
+	TCanvas * c =new TCanvas(printName,printName);
+	std::vector<Drawing::Drawable1D> drawables;
+	prepHist(drawables);
+	Drawing::drawPane(c,drawables,&topStyle,true);
+	if(stackHists.size()){
+		topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? stackHists[0].getYTitle() : topStyle.yTitle.Data());
+		topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0].getXTitle() : topStyle.xTitle.Data());
+	} else {
+		topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? hists[0].getYTitle() : topStyle.yTitle.Data());
+		topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle() : topStyle.xTitle.Data());
+	}
+	if(save) c->Print(printName);
+	return c;
 }
 
 TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, bool save, TString printName){
   if(hists.size() == 0 && stackHists.size() == 0)throw std::invalid_argument("Plotter::drawRatio -> Need to provide histograms");;
-
-  if(doUnderflow){ for(auto * h : hists) PlotTools::toUnderflow(h); for(auto * h : stackHists) PlotTools::toUnderflow(h);}
-  if(doOverflow) { for(auto * h : hists) PlotTools::toOverflow(h); for(auto * h : stackHists) PlotTools::toOverflow(h);}
 
   std::vector<Drawing::Drawable1D> ratDrawables;
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
@@ -84,9 +78,9 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
 
   topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : topStyle.yTitle.Data());
   if(stackHists.size()){
-    topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0]->GetXaxis()->GetTitle() : topStyle.xTitle.Data());
+    topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0].getXTitle() : topStyle.xTitle.Data());
   } else {
-    topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0]->GetXaxis()->GetTitle() : topStyle.xTitle.Data());
+    topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle() : topStyle.xTitle.Data());
   }
 
   if(save) c->Write(printName);
@@ -95,9 +89,6 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
 
 TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErrors, bool save, TString printName){
   if(hists.size() == 0 && stackHists.size() == 0) return 0;
-
-  if(doUnderflow){ for(auto * h : hists) PlotTools::toUnderflow(h); for(auto * h : stackHists) PlotTools::toUnderflow(h);}
-  if(doOverflow) { for(auto * h : hists) PlotTools::toOverflow(h); for(auto * h : stackHists) PlotTools::toOverflow(h);}
 
   double topScale = (.75)*(1/.66);
   if(topStyle.leg_y1 < 0) topStyle.leg_y1 *= (1/.66);
@@ -122,9 +113,9 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   topStyle.yAxis->SetTitleSize(topStyle.yAxis->GetTitleSize()*topScale);
 
   if(stackHists.size()){
-    topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? stackHists[0]->GetYaxis()->GetTitle() : topStyle.yTitle.Data());
+    topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? stackHists[0].getYTitle() : topStyle.yTitle.Data());
   } else {
-    topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? hists[0]->GetYaxis()->GetTitle() : topStyle.yTitle.Data());
+    topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? hists[0].getYTitle() : topStyle.yTitle.Data());
   }
 
   c->cd();
@@ -148,9 +139,9 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
 
   botStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : botStyle.yTitle.Data());
   if(stackHists.size()){
-    botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0]->GetXaxis()->GetTitle() : botStyle.xTitle.Data());
+    botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0].getXTitle() : botStyle.xTitle.Data());
   } else {
-    botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0]->GetXaxis()->GetTitle() : botStyle.xTitle.Data());
+    botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle()  : botStyle.xTitle.Data());
   }
 
   if(save) c->Write(printName);
@@ -160,51 +151,70 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
 
 
 void Plotter::scale(double scale){
-  for(auto * h : hists) h->Scale(scale);
-  for(auto * h : stackHists) h->Scale(scale);
+  for(auto& h : hists) if(h.type == Drawing::HIST1D) ((TH1*)h.obj)->Scale(scale);
+  for(auto& h : stackHists) if(h.type == Drawing::HIST1D) ((TH1*)h.obj)->Scale(scale);
+  if(totStack.type != Drawing::NONE) ((TH1*)totStack.obj)->Scale(scale);
 }
 void Plotter::normalize() {
-  for(auto * h : hists) PlotTools::normalize(h);
-  if(totStack){
-    double stackNorm = totStack->Integral(0,-1);
-    for(auto * h : stackHists) h->Scale(1/stackNorm);
-    totStack->Scale(1/stackNorm);
+  for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::normalize((TH1*)h.obj);
+  if(totStack.type != Drawing::NONE){
+    double stackNorm = ((TH1*)totStack.obj)->Integral(0,-1);
+    for(auto& h : stackHists) ((TH1*)h.obj)->Scale(1/stackNorm);
+    ((TH1*)totStack.obj)->Scale(1/stackNorm);
   }
 }
 
 void Plotter::rebin(int n){
-  for(auto * h : hists) PlotTools::rebin(h,n);
-  for(auto * h : stackHists) PlotTools::rebin(h,n);
+  for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n);
+  for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n);
 }
 void Plotter::rebin(int n, double * bins){
-  for(auto * h : hists) PlotTools::rebin(h,n,bins);
-  for(auto * h : stackHists) PlotTools::rebin(h,n,bins);
+  for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n,bins);
+  for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n,bins);
 }
 
 void Plotter::prepHist(std::vector<Drawing::Drawable1D>& drawables){
-  if(stackHists.size())drawables.push_back(Drawing::makeStack(stackHists, stackHistTitles,totStack));
-  if(hists.size())
-  for(int iH = hists.size() -1; iH >= 0; --iH){
-    drawables.push_back(Drawing::makeHist(hists[iH], histTitles[iH],histDrawOptions[iH],histDoPoissonErrors[iH]));
-  }
+	if(doUnderflow){
+		for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::toUnderflow((TH1*)h.obj);
+		for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::toUnderflow((TH1*)h.obj);
+	}
+	if(doOverflow){
+		for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::toOverflow((TH1*)h.obj);
+		for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::toOverflow((TH1*)h.obj);
+	}
+	if(stackHists.size())drawables.push_back(Drawing::makeStack(stackHists,totStack));
+	if(hists.size())
+		for(int iH = hists.size() -1; iH >= 0; --iH){
+			if(hists[iH].doPoisson) drawables.push_back(Drawing::convertToPoisson(hists[iH]));
+			else drawables.push_back(hists[iH]);
+		}
 }
 
 TString Plotter::prepRat(std::vector<Drawing::Drawable1D>& drawables, int denIDX, TString stackTitle,bool doBinomErrors){
-  TH1 * den = 0;
-  TString denTitle;
-  if(denIDX < 0){
-    den = totStack;
-    denTitle = stackTitle;
-  }  else if(denIDX < int(hists.size())) {
-    den = hists[denIDX];
-    denTitle = histTitles[denIDX];
-  } else {throw std::invalid_argument("Plotter::prepRat -> Need to provide a denominator");;}
+	if(doUnderflow){
+		for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::toUnderflow((TH1*)h.obj);
+		for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::toUnderflow((TH1*)h.obj);
+	}
+	if(doOverflow){
+		for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::toOverflow((TH1*)h.obj);
+		for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::toOverflow((TH1*)h.obj);
+	}
 
-  if(denIDX >= 0 && totStack) drawables.push_back(Drawing::makeRatio(totStack, den,stackTitle,"",doBinomErrors));
-  if(hists.size())
-  for(int iH = hists.size() -1; iH >= 0; --iH){
-    if(int(iH) == denIDX) continue;
-    drawables.push_back(Drawing::makeRatio(hists[iH], den,histTitles[iH],histDrawOptions[iH],doBinomErrors,histDoPoissonErrors[iH]));
-  }
-  return denTitle;
+	TH1 * den = 0;
+	TString denTitle;
+	if(denIDX < 0){
+		den = (TH1*)totStack.obj;
+		denTitle = stackTitle;
+	}  else if(denIDX < int(hists.size())) {
+		den = (TH1*)hists[denIDX].obj;
+		denTitle = hists[denIDX].title;
+	} else {throw std::invalid_argument("Plotter::prepRat -> Need to provide a denominator");;}
+
+	if(denIDX >= 0 && totStack.obj) drawables.push_back(Drawing::makeRatio((TH1*)totStack.obj, den,stackTitle,"",doBinomErrors));
+	if(hists.size())
+		for(int iH = hists.size() -1; iH >= 0; --iH){
+			if(int(iH) == denIDX) continue;
+			drawables.push_back(Drawing::makeRatio(hists[iH], den,doBinomErrors));
+		}
+	return denTitle;
 }
