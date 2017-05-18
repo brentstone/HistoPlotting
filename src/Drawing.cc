@@ -2,7 +2,9 @@
 #include <THStack.h>
 #include <TGraphAsymmErrors.h>
 #include "TCanvas.h"
+#include "TLatex.h"
 #include <iostream>
+
 namespace Drawing{
 
 TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, double y1, double x2, double y2, int nColumns){
@@ -20,16 +22,21 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, doubl
   legend->SetBorderSize(0);
   legend->SetNColumns(nColumns);
 
-  for(unsigned int iD = 0; iD < drawables.size(); ++iD){
+  for(int iD = drawables.size() -1; iD >= 0; --iD){
+//  for(unsigned int iD = 0; iD < drawables.size(); ++iD){
     if(int(iD) == stackIDX) continue;//If it is a stack wait!
     TString opt = "";
     if(drawables[iD].type == Drawing::GRAPH){
       if(drawables[iD].drawOpt.Contains("0",TString::kIgnoreCase)) opt = "E";
+      if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
+      if(drawables[iD].drawOpt.Contains("L",TString::kIgnoreCase)) opt += "L";
+      if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt += "L";
     } else {
       if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt = "E";
+      if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
+      else opt += "L";
     }
-    if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
-    else opt += "L";
+
     legend->AddEntry(drawables[iD].obj,drawables[iD].title,opt);
   }
   if(stackIDX >= 0){
@@ -90,5 +97,34 @@ void drawPane(TPad * pad, std::vector<Drawable1D>& drawables, PadStyle * style, 
 
   if(doBuildLegend)style->legend->Draw();
 
+}
+
+void drawTLatex(TPad * pad, const std::vector<TLatexDef>& textList){
+	pad->cd();
+	for(const auto& text : textList ){
+  	  TLatex latex;
+  	  latex.SetNDC();
+  	  if(std::get<3>(text) >= 0 )latex.SetTextSize(std::get<3>(text));
+  	  if(std::get<4>(text) >= 0 )latex.SetTextColor(std::get<4>(text));
+  	  if(std::get<5>(text) >= 0 )latex.SetTextAngle(std::get<5>(text));
+  	  if(std::get<6>(text) >= 0 )latex.SetTextFont(std::get<6>(text));
+	  latex.DrawLatex(std::get<1>(text),std::get<2>(text),std::get<0>(text));
+	}
+}
+
+TCanvas* setupSinglePaneCanvas(TString printName, const PadStyle * style){
+	TCanvas * c = 0;
+	if(style->canvasHeight > 0 && style->canvasWidth > 0  ){
+		c =new TCanvas(printName,printName,style->canvasWidth,style->canvasHeight);
+		c->SetWindowSize(style->canvasWidth + (style->canvasWidth - c->GetWw()), style->canvasHeight + (style->canvasHeight - c->GetWh()));
+	} else{
+		c =new TCanvas(printName,printName);
+	}
+	if(style->leftMarginSize >= 0) c->SetLeftMargin(style->leftMarginSize);
+	if(style->rightMarginSize >= 0) c->SetRightMargin(style->rightMarginSize);
+	if(style->topMarginSize >= 0) c->SetTopMargin(style->topMarginSize);
+	if(style->botMarginSize >= 0) c->SetBottomMargin(style->botMarginSize);
+
+	return c;
 }
 }

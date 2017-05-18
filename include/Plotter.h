@@ -15,16 +15,19 @@
 #include "../include/Drawing.h"
 
 
+
 class Plotter{
 public:
   enum ErrorType {GAUS,POISSON, BINOM};
   Plotter() {};
 
+  //Adding content...must be done before drawing!
   void addDrawable(Drawing::Drawable1D& input);
-  TH1* addHist(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 3, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
-  TH1* addHistLine(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 3){return addHist(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
+  TH1* addHist(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
+  TH1* addHistLine(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4){return addHist(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
   TH1* addStackHist(const TH1 * hist, TString title, int fillColor =-1, int fillStyle =1001, int lineColor = 1, int lineWidth =2);
-
+  void addText(TString text, float posX=0.5, float posY =0.5, float textSize = -1, int color = -1, int angle = -1, int font = -1 ) //negative means default
+  { textList.push_back(std::make_tuple(text,posX,posY,textSize,color,angle,font));}
 
   TCanvas * draw(bool save=false, TString printName = "plot.pdf");
   //If denIDX < 0, use the stack
@@ -46,7 +49,26 @@ public:
   void setXTitle(TString title) {topStyle.xTitle = title;}
   void setYTitle(TString title) {topStyle.yTitle = title;}
   void setYTitleBot(TString title) {botStyle.yTitle = title;}
+  void setLegendPos(float x1, float y1, float x2, float y2)
+  {topStyle.leg_x1 = x1;topStyle.leg_x2 = x2;topStyle.leg_y1 = y1;topStyle.leg_y2 = y2;}
 
+
+  void setCMSLumi(int cmsLumiPos = 33, TString lumiText = "19.7 fb^{-1} (8 TeV)",TString extraText = "", float extraTextOff = 1.6) {
+	  topStyle.addCMSLumi = true; topStyle.cmsLumiPos = cmsLumiPos; topStyle.lumiText = lumiText; topStyle.extraText = extraText;
+	  topStyle.extraTextOff= extraTextOff;
+  }
+
+  void setCanvasSize(int canvasWidth=-1,int canvasHeight=-1) {topStyle.canvasHeight =canvasHeight; topStyle.canvasWidth =canvasWidth;}
+  void setMargins(float topMarginSize=-1, float botMarginSize=-1, float leftMarginSize=-1, float rightMarginSize=-1)
+  {topStyle.topMarginSize =topMarginSize; topStyle.botMarginSize =botMarginSize;topStyle.leftMarginSize =leftMarginSize;topStyle.rightMarginSize =rightMarginSize;}
+  void setAxisTextSize(float axisTextSize = -1) {topStyle.axisTextSize =axisTextSize;}
+
+
+  //Axis information...only available after drawing!
+  TAxis * xAxis() {return topStyle.xAxis;}
+  TAxis * yAxis() {return topStyle.yAxis;}
+  TAxis * botXAxis() {return botStyle.xAxis;}
+  TAxis * botYAxis() {return botStyle.yAxis;}
 
 
 private:
@@ -64,6 +86,7 @@ private:
   Drawing::Drawable1D totStack;
   std::vector<Drawing::Drawable1D> hists;
   std::vector<Drawing::Drawable1D> stackHists;
+  std::vector<Drawing::TLatexDef> textList;
 };
 
 

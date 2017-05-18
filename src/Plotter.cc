@@ -1,4 +1,5 @@
 #include "THStack.h"
+#include "TFrame.h"
 #include "../include/Plotter.h"
 #include "../include/StyleInfo.h"
 #include "../include/PlotTools.h"
@@ -53,7 +54,7 @@ TH1* Plotter::addStackHist(const TH1 * hist, TString title, int fillColor, int f
 TCanvas * Plotter::draw(bool save, TString printName){
 	if(hists.size() == 0 && stackHists.size() == 0) return 0;
 
-	TCanvas * c =new TCanvas(printName,printName);
+	TCanvas * c =setupSinglePaneCanvas(printName,&topStyle);
 	std::vector<Drawing::Drawable1D> drawables;
 	prepHist(drawables);
 	Drawing::drawPane(c,drawables,&topStyle,true);
@@ -64,6 +65,24 @@ TCanvas * Plotter::draw(bool save, TString printName){
 		topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? hists[0].getYTitle() : topStyle.yTitle.Data());
 		topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle() : topStyle.xTitle.Data());
 	}
+
+	if(topStyle.axisTextSize >= 0){
+		float baseSize = topStyle.axisTextSize ? topStyle.axisTextSize :  0.6*c->GetTopMargin();
+		topStyle.yAxis->SetTitleSize(baseSize);
+		topStyle.xAxis->SetTitleSize(baseSize);
+		topStyle.yAxis->SetLabelSize(0.833*baseSize);
+		topStyle.xAxis->SetLabelSize(0.833*baseSize);
+	}
+
+
+	if(topStyle.addCMSLumi){
+        StyleInfo::CMS_lumi(c, topStyle.cmsLumiPos, topStyle.lumiText, topStyle.extraText, topStyle.extraTextOff );
+        c->Update();
+        c->RedrawAxis();
+        c->GetFrame()->Draw();
+	}
+
+	Drawing::drawTLatex(c,textList);
 	if(save) c->Print(printName);
 	return c;
 }
@@ -83,7 +102,7 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
     topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle() : topStyle.xTitle.Data());
   }
 
-  if(save) c->Write(printName);
+  if(save) c->Print(printName);
   return c;
 }
 
@@ -144,7 +163,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
     botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle()  : botStyle.xTitle.Data());
   }
 
-  if(save) c->Write(printName);
+  if(save) c->Print(printName);
   return c;
 }
 
@@ -184,7 +203,8 @@ void Plotter::prepHist(std::vector<Drawing::Drawable1D>& drawables){
 	}
 	if(stackHists.size())drawables.push_back(Drawing::makeStack(stackHists,totStack));
 	if(hists.size())
-		for(int iH = hists.size() -1; iH >= 0; --iH){
+//		for(int iH = hists.size() -1; iH >= 0; --iH){
+		for(unsigned int iH = 0; iH <  hists.size() ; ++iH){
 			if(hists[iH].doPoisson) drawables.push_back(Drawing::convertToPoisson(hists[iH]));
 			else drawables.push_back(hists[iH]);
 		}
