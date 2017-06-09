@@ -92,7 +92,7 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
 
   std::vector<Drawing::Drawable1D> ratDrawables;
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
-  TCanvas * c =new TCanvas(printName,printName);
+  TCanvas * c =setupSinglePaneCanvas(printName,&topStyle);
   Drawing::drawPane(c,ratDrawables,&topStyle,true);
 
   topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : topStyle.yTitle.Data());
@@ -101,6 +101,23 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
   } else {
     topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle() : topStyle.xTitle.Data());
   }
+
+	if(topStyle.axisTextSize >= 0){
+		float baseSize = topStyle.axisTextSize ? topStyle.axisTextSize :  0.6*c->GetTopMargin();
+		topStyle.yAxis->SetTitleSize(baseSize);
+		topStyle.xAxis->SetTitleSize(baseSize);
+		topStyle.yAxis->SetLabelSize(0.833*baseSize);
+		topStyle.xAxis->SetLabelSize(0.833*baseSize);
+	}
+
+	if(topStyle.addCMSLumi){
+        StyleInfo::CMS_lumi(c, topStyle.cmsLumiPos, topStyle.lumiText, topStyle.extraText, topStyle.extraTextOff );
+        c->Update();
+        c->RedrawAxis();
+        c->GetFrame()->Draw();
+	}
+
+	Drawing::drawTLatex(c,textList);
 
   if(save) c->Print(printName);
   return c;
@@ -186,10 +203,13 @@ void Plotter::normalize() {
 void Plotter::rebin(int n){
   for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n);
   for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n);
+  if(totStack.obj) PlotTools::rebin(((TH1*)totStack.obj),n);
 }
 void Plotter::rebin(int n, double * bins){
   for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n,bins);
   for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n,bins);
+  if(totStack.obj) PlotTools::rebin(((TH1*)totStack.obj),n,bins);
+
 }
 
 void Plotter::prepHist(std::vector<Drawing::Drawable1D>& drawables){

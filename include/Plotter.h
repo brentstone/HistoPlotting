@@ -35,6 +35,9 @@ public:
   TCanvas * drawRatio(int denIDX = 0, TString stackTitle = "stack", bool doBinomErrors=false, bool save=false, TString printName = "plot.pdf");
   TCanvas * drawSplitRatio(int denIDX = 0, TString stackTitle = "stack", bool doBinomErrors=false, bool save=false, TString printName = "plot.pdf");
 
+  float getStackIntegral() const {return totStack.obj ? ((TH1*)totStack.obj)->Integral(0,-1) : 0.0;}
+  const TH1 * getTotStack() const {return (const TH1*)totStack.obj;}
+
   //Drawing options
   void setUnderflow(bool doIt) {doUnderflow = doIt;}
   void setOverflow(bool doIt) {doOverflow = doIt;}

@@ -109,7 +109,7 @@ Drawable1D  makeStack(std::vector<Drawable1D>& hists,Drawable1D& totStack) {
     const TGraphAsymmErrors * graph = (const TGraphAsymmErrors *)drawable.obj;
       for(int iB = 0; iB < graph->GetN(); ++iB){
         graph->GetPoint(iB,x,y);
-        std::cout << iB << " "<< y <<" "<<graph->GetErrorYhigh(iB)<<std::endl;
+//        std::cout << iB << " "<< y <<" "<<graph->GetErrorYhigh(iB)<<std::endl;
         max = std::max(y + graph->GetErrorYhigh(iB), max );
       }
     return max;
