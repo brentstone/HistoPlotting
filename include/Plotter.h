@@ -23,6 +23,8 @@ public:
 
   //Adding content...must be done before drawing!
   void addDrawable(Drawing::Drawable1D& input);
+  TGraph* addGraph(const TGraph * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
+  TGraph* addGraphLine(const TGraph * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4){return addGraph(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
   TH1* addHist(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
   TH1* addHistLine(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4){return addHist(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
   TH1* addStackHist(const TH1 * hist, TString title, int fillColor =-1, int fillStyle =1001, int lineColor = 1, int lineWidth =2);
@@ -54,6 +56,7 @@ public:
   void setYTitleBot(TString title) {botStyle.yTitle = title;}
   void setLegendPos(float x1, float y1, float x2, float y2)
   {topStyle.leg_x1 = x1;topStyle.leg_x2 = x2;topStyle.leg_y1 = y1;topStyle.leg_y2 = y2;}
+  void setLegendNColumns(int nCol = 1) {topStyle.leg_nColumns = nCol;}
 
 
   void setCMSLumi(int cmsLumiPos = 33, TString lumiText = "19.7 fb^{-1} (8 TeV)",TString extraText = "", float extraTextOff = 1.6) {
@@ -90,6 +93,8 @@ private:
   std::vector<Drawing::Drawable1D> hists;
   std::vector<Drawing::Drawable1D> stackHists;
   std::vector<Drawing::TLatexDef> textList;
+
+  static int nGraphs;
 };
 
 

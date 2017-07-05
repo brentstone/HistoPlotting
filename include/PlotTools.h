@@ -16,10 +16,15 @@ namespace PlotTools {
   TH1* rebin      (TH1* h, int n);
   TH1* rebin      (TH1* h, int n, double * bins);
 
+  //returns the size of the (lower,upper) error bars
+  std::pair<double,double> getBinomError(const double num, const double den);
   TGraphAsymmErrors* getBinomErrors(const TH1* num, const TH1* den);
   TGraphAsymmErrors* getPoissonErrors(const TH1* hist);
   TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hnum, const TH1* hden);
   void getRatioPoissonErrors(int dN, double mN, double mE, double& eL, double& eH);
+
+  TGraph* getRocCurve(const TH1* xHist, const TH1 * yHist, bool cutGreaterThan, TString xName="", TString yName ="");
+  TH1* getIntegral(const TH1* hist, bool greaterThan, bool normalize = false);
 }
 
 #endif

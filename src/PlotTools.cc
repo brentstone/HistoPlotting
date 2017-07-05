@@ -1,4 +1,5 @@
 #include "../include/PlotTools.h"
+#include "iostream"
 #include <TEfficiency.h>
 #include <TMath.h>
 #include <TRandom3.h>
@@ -66,6 +67,12 @@ namespace PlotTools {
     return h->Rebin(n,"",bins);
   }
 
+  std::pair<double,double> getBinomError(const double num, const double den){
+	  const double eff = num/den;
+	  if(den < 1.0 || eff < 0.0 || eff > 1.0 ) return std::make_pair(0,0);
+	  return std::make_pair( eff - TEfficiency::ClopperPearson((unsigned int)den, (unsigned int)num, 0.683, true),
+			  TEfficiency::ClopperPearson((unsigned int)den, (unsigned int)num, 0.683, false) - eff);
+  }
 
   TGraphAsymmErrors* getBinomErrors(const TH1* num, const TH1* den){
     int npoints = den->GetNbinsX();
@@ -81,8 +88,9 @@ namespace PlotTools {
       if(y[ibin-1]==0.0) {
         erryl[ibin-1] = 0.0; erryh[ibin-1] = 0.0;
       } else {
-        erryl[ibin-1] = y[ibin-1] - TEfficiency::ClopperPearson((unsigned int)ntotal, (unsigned int)npass, 0.683, false);
-        erryh[ibin-1] = TEfficiency::ClopperPearson((unsigned int)ntotal, (unsigned int)npass, 0.683, true) - y[ibin-1];
+    	  auto errors = getBinomError(npass,ntotal);
+        erryl[ibin-1] = errors.first;
+        erryh[ibin-1] = errors.second;
       }
     }
 
@@ -168,5 +176,57 @@ namespace PlotTools {
     eH = h[int( double(nEntries)* (1 - alpha/2)  )];
     eH = eH - double(dN)/mN;
   }
+
+
+  TGraph* getRocCurve(const TH1* xHist, const TH1 * yHist, bool cutGreaterThan,TString xName, TString yName) {
+	  const unsigned int nBins = xHist->GetNbinsX() ;
+	  if(int(nBins) != yHist->GetNbinsX()) {
+		  std:: cout <<" PlotTools::getRocCurve -> cannot make a ROC curve when the histograms have different number of bins!" <<std::endl;
+		  return 0;
+	  }
+
+	  const double xHistInt = xHist->Integral(0,-1);
+	  const double yHistInt = yHist->Integral(0,-1);
+
+	  double xeff[nBins], yeff[nBins];
+
+	  for(unsigned int iB =1; iB <= nBins; ++iB ){
+		  const double xPass = cutGreaterThan ? xHist->Integral(iB,-1) : xHist->Integral(0,iB);
+		  const double yPass = cutGreaterThan ? yHist->Integral(iB,-1) : yHist->Integral(0,iB);
+		  xeff[iB -1] = xPass/xHistInt;
+		  yeff[iB -1] = yPass/yHistInt;
+	  }
+	  auto * gr = new TGraph(nBins,xeff,yeff);;
+	  gr->GetXaxis()->SetTitle(TString::Format("#varepsilon(%s %s X)",xName.Data(),cutGreaterThan ? ">" : "<"));
+	  gr->GetYaxis()->SetTitle(TString::Format("#varepsilon(%s %s X)",yName.Data(),cutGreaterThan ? ">" : "<"));
+	  gr->GetXaxis()->SetRangeUser(0,1);
+	  gr->GetYaxis()->SetRangeUser(0,1);
+	  return gr;
+  }
+
+  TH1* getIntegral(const TH1* hist, bool greaterThan, bool normalize) {
+	  const unsigned int nBins = hist->GetNbinsX() ;
+	  const double histInt = hist->Integral(0,-1);
+	  TH1 * histI = (TH1*)hist->Clone();
+
+	  for(unsigned int iB =1; iB <= nBins; ++iB ){
+		  double pass=0;
+		  if(iB == 1){
+			  pass = greaterThan ? hist->Integral(0,-1) : hist->Integral(0,iB);
+		  } else if(iB == nBins){
+			  pass = greaterThan ? hist->Integral(iB,-1) : hist->Integral(0,-1);
+		  } else{
+			  pass = greaterThan ? hist->Integral(iB,-1) : hist->Integral(0,iB);
+		  }
+		  histI->SetBinContent(iB,normalize ? pass/histInt : pass );
+		  histI->SetBinError(iB,0);
+	  }
+	  histI->SetBinContent(0,0);
+	  histI->SetBinError(0,0);
+	  histI->SetBinContent(nBins+1,0);
+	  histI->SetBinError(nBins+1,0);
+	  return histI;
+  }
+
 
 }

@@ -8,6 +8,33 @@ void Plotter::addDrawable(Drawing::Drawable1D& input) {
 	newDrawable.obj = newDrawable.obj->Clone();
 	hists.push_back(newDrawable);
 }
+TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
+	TGraph * h = new TGraphAsymmErrors(hist->GetN(),hist->GetX(),hist->GetY(),hist->GetEXlow(),hist->GetEXhigh(),hist->GetEYlow(),hist->GetEYhigh());
+	h->SetHistogram((TH1F*)hist->GetHistogram()->Clone(TString::Format("Plotter::addGraph::histogram::%u",nGraphs)));
+	nGraphs++;
+	//style
+	h->SetLineColor(lineColor >= 0 ? lineColor : StyleInfo::getLineColor(hists.size()) );
+	h->SetLineWidth(lineWidth);
+
+	if(drawMarker){
+		h->SetMarkerColor(lineColor >= 0 ? lineColor : StyleInfo::getLineColor(hists.size()) );
+		h->SetMarkerStyle(markerStyle);
+		h->SetMarkerSize(markerSize);
+	} else {
+		h->SetLineStyle(lineStyle);
+		h->SetMarkerStyle(0);
+		h->SetMarkerSize(0);
+	}
+	  if(drawOption == ""){
+	    if(drawErrorBars) drawOption = "E1X0 ";
+	    if(drawMarker) drawOption += "P ";
+	    else drawOption += "L ";
+	  }
+
+	  hists.emplace_back(drawOption,title,Drawing::GRAPH,h,poissonErrors);
+	  hists.back().graphAxisHist = h->GetHistogram();
+	  return h;
+}
 TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
   TH1* h = (TH1*)hist->Clone();
   //style
@@ -258,3 +285,6 @@ TString Plotter::prepRat(std::vector<Drawing::Drawable1D>& drawables, int denIDX
 		}
 	return denTitle;
 }
+
+int Plotter::nGraphs = 0;
+
