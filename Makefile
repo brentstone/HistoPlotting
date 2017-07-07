@@ -16,9 +16,9 @@ INTS = $(INTDIR)/Plotter.h $(INTDIR)/PlotTools.h $(INTDIR)/Drawable.h $(INTDIR)/
 
 libHistoPlotting.so: $(OBJS)
 ifeq ($(PLATFORM),macosx)
-	$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS) -lTreePlayer
+	$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
 else
-	$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS) -lTreePlayer
+	$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
 endif
 
 HistoPlottingDict.cc: $(INTS) $(SRCDIR)/HistoPlotting_LinkDef.h
