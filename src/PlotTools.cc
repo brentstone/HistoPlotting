@@ -70,8 +70,8 @@ namespace PlotTools {
   std::pair<double,double> getBinomError(const double num, const double den){
 	  const double eff = num/den;
 	  if(den < 1.0 || eff < 0.0 || eff > 1.0 ) return std::make_pair(0,0);
-	  return std::make_pair( eff - TEfficiency::ClopperPearson((unsigned int)den, (unsigned int)num, 0.683, true),
-			  TEfficiency::ClopperPearson((unsigned int)den, (unsigned int)num, 0.683, false) - eff);
+	  return std::make_pair( eff - TEfficiency::ClopperPearson((unsigned int)den, (unsigned int)num, 0.683, false),
+			  TEfficiency::ClopperPearson((unsigned int)den, (unsigned int)num, 0.683, true) - eff);
   }
 
   TGraphAsymmErrors* getBinomErrors(const TH1* num, const TH1* den){
