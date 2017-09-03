@@ -26,7 +26,7 @@ TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int
 		h->SetMarkerSize(0);
 	}
 	  if(drawOption == ""){
-	    if(drawErrorBars) drawOption = "E1X0 ";
+	    if(drawErrorBars) drawOption = "E 0 ";
 	    if(drawMarker) drawOption += "P ";
 	    else drawOption += "L ";
 	  }
@@ -99,7 +99,15 @@ TCanvas * Plotter::draw(bool save, TString printName){
 		topStyle.xAxis->SetTitleSize(baseSize);
 		topStyle.yAxis->SetLabelSize(0.833*baseSize);
 		topStyle.xAxis->SetLabelSize(0.833*baseSize);
+	} else {
+        topStyle.yAxis->SetTitleSize(labelSF*topStyle.yAxis->GetTitleSize());
+        topStyle.xAxis->SetTitleSize(labelSF*topStyle.xAxis->GetTitleSize());
+        topStyle.yAxis->SetLabelSize(labelSF*topStyle.yAxis->GetLabelSize());
+        topStyle.xAxis->SetLabelSize(labelSF*topStyle.xAxis->GetLabelSize());
+        topStyle.yAxis->SetTitleOffset(labelSF*labelSF*topStyle.yAxis->GetTitleOffset());
 	}
+
+
 
 
 	if(topStyle.addCMSLumi){
@@ -135,7 +143,13 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
 		topStyle.xAxis->SetTitleSize(baseSize);
 		topStyle.yAxis->SetLabelSize(0.833*baseSize);
 		topStyle.xAxis->SetLabelSize(0.833*baseSize);
-	}
+    } else {
+        topStyle.yAxis->SetTitleSize(labelSF*topStyle.yAxis->GetTitleSize());
+        topStyle.xAxis->SetTitleSize(labelSF*topStyle.xAxis->GetTitleSize());
+        topStyle.yAxis->SetLabelSize(labelSF*topStyle.yAxis->GetLabelSize());
+        topStyle.xAxis->SetLabelSize(labelSF*topStyle.xAxis->GetLabelSize());
+        topStyle.yAxis->SetTitleOffset(labelSF*labelSF*topStyle.yAxis->GetTitleOffset());
+    }
 
 	if(topStyle.addCMSLumi){
         StyleInfo::CMS_lumi(c, topStyle.cmsLumiPos, topStyle.lumiText, topStyle.extraText, topStyle.extraTextOff );
@@ -153,7 +167,7 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
 TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErrors, bool save, TString printName){
   if(hists.size() == 0 && stackHists.size() == 0) return 0;
 
-  double topScale = (.75)*(1/.66);
+  double topScale = labelSF*(1/.66);
   if(topStyle.leg_y1 < 0) topStyle.leg_y1 *= (1/.66);
   topStyle.leg_y2 -= .05;
 
@@ -172,7 +186,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
 
 
   topStyle.yAxis->SetLabelSize(topStyle.yAxis->GetLabelSize()*topScale );
-  topStyle.yAxis->SetTitleOffset(topStyle.yAxis->GetTitleOffset()*.70);
+  topStyle.yAxis->SetTitleOffset(topStyle.yAxis->GetTitleOffset());
   topStyle.yAxis->SetTitleSize(topStyle.yAxis->GetTitleSize()*topScale);
 
   if(stackHists.size()){
@@ -193,10 +207,10 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   std::vector<Drawing::Drawable1D> ratDrawables;
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
   Drawing::drawPane(pad2,ratDrawables,&botStyle,false);
-  double botScale = (.75)*(1/.33);
+  double botScale = labelSF*(1/.33);
   botStyle.yAxis->SetLabelSize(botStyle.yAxis->GetLabelSize()*botScale);
   botStyle.yAxis->SetTitleSize(botStyle.yAxis->GetTitleSize()*botScale);
-  botStyle.yAxis->SetTitleOffset(botStyle.yAxis->GetTitleOffset()*.33);
+  botStyle.yAxis->SetTitleOffset(botStyle.yAxis->GetTitleOffset()*.33/.66);
   botStyle.xAxis->SetLabelSize(botStyle.xAxis->GetLabelSize()*botScale);
   botStyle.xAxis->SetTitleSize(botStyle.xAxis->GetTitleSize()*botScale);
 
@@ -206,6 +220,17 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   } else {
     botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle()  : botStyle.xTitle.Data());
   }
+
+
+  if(topStyle.addCMSLumi){
+      StyleInfo::CMS_lumi(pad1, topStyle.cmsLumiPos, topStyle.lumiText, topStyle.extraText, topStyle.extraTextOff );
+      pad1->Update();
+      pad1->RedrawAxis();
+      pad1->GetFrame()->Draw();
+  }
+
+  Drawing::drawTLatex(c,textList);
+
 
   if(save) c->Print(printName);
   return c;
@@ -233,9 +258,9 @@ void Plotter::rebin(int n){
   if(totStack.obj) PlotTools::rebin(((TH1*)totStack.obj),n);
 }
 void Plotter::rebin(int n, double * bins){
-  for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n,bins);
-  for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::rebin(((TH1*)h.obj),n,bins);
-  if(totStack.obj) PlotTools::rebin(((TH1*)totStack.obj),n,bins);
+  for(auto& h : hists) if(h.type == Drawing::HIST1D) h.obj = PlotTools::rebin(((TH1*)h.obj),n,bins);
+  for(auto& h : stackHists) if(h.type == Drawing::HIST1D) h.obj = PlotTools::rebin(((TH1*)h.obj),n,bins);
+  if(totStack.obj) totStack.obj = PlotTools::rebin(((TH1*)totStack.obj),n,bins);
 
 }
 

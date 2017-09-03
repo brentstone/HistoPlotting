@@ -50,7 +50,7 @@ public:
 
   //Style accessors
   void setMinMax(double iMin, double iMax) {topStyle.yAxis_min = iMin; topStyle.yAxis_max= iMax;}
-  void setBottMinMax(double iMin, double iMax) {botStyle.yAxis_min = iMin; botStyle.yAxis_max= iMax;}
+  void setBotMinMax(double iMin, double iMax) {botStyle.yAxis_min = iMin; botStyle.yAxis_max= iMax;}
   void setXTitle(TString title) {topStyle.xTitle = title;}
   void setYTitle(TString title) {topStyle.yTitle = title;}
   void setYTitleBot(TString title) {botStyle.yTitle = title;}
@@ -59,10 +59,15 @@ public:
   void setLegendNColumns(int nCol = 1) {topStyle.leg_nColumns = nCol;}
 
 
-  void setCMSLumi(int cmsLumiPos = 33, TString lumiText = "19.7 fb^{-1} (8 TeV)",TString extraText = "", float extraTextOff = 1.6) {
+
+  void setCMSLumi(int cmsLumiPos = 33, TString lumiText = "35.9 fb^{-1} (13 TeV)",TString extraText = "", float extraTextOff = 1.6) {
 	  topStyle.addCMSLumi = true; topStyle.cmsLumiPos = cmsLumiPos; topStyle.lumiText = lumiText; topStyle.extraText = extraText;
 	  topStyle.extraTextOff= extraTextOff;
   }
+
+  void setCMSLumiExtraText(TString extraText) { topStyle.extraText = extraText;}
+  void setCMSLumiLumiText(TString lumiText)  { topStyle.lumiText = lumiText;}
+  void setCMSLumiPosition(int cmsLumiPos, float extraTextOff = 1.6 )  { topStyle.cmsLumiPos = cmsLumiPos;topStyle.extraTextOff= extraTextOff;}
 
   void setCanvasSize(int canvasWidth=-1,int canvasHeight=-1) {topStyle.canvasHeight =canvasHeight; topStyle.canvasWidth =canvasWidth;}
   void setMargins(float topMarginSize=-1, float botMarginSize=-1, float leftMarginSize=-1, float rightMarginSize=-1)
@@ -95,6 +100,8 @@ private:
   std::vector<Drawing::TLatexDef> textList;
 
   static int nGraphs;
+
+  const float labelSF = 1.15; //text size scale up...for what doesnt work in the stylesheet
 };
 
 
