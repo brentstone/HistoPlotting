@@ -1,4 +1,5 @@
 #include "TStyle.h"
+#include "TGAxis.h"
 
 // tdrGrid: Turns the grid lines on (true) or off (false)
 //
@@ -111,11 +112,11 @@ void setTDRStyle() {
 
   tdrStyle->SetTitleColor(1, "XYZ");
   tdrStyle->SetTitleFont(42, "XYZ");
-  tdrStyle->SetTitleSize(0.06, "XYZ");
+  tdrStyle->SetTitleSize(0.04, "XYZ");
   // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
   // tdrStyle->SetTitleYSize(Float_t size = 0.02);
   tdrStyle->SetTitleXOffset(0.9);
-  tdrStyle->SetTitleYOffset(1.25);
+  tdrStyle->SetTitleYOffset(1.20);
   // tdrStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
 
 // For the axis labels:
@@ -123,16 +124,18 @@ void setTDRStyle() {
   tdrStyle->SetLabelColor(1, "XYZ");
   tdrStyle->SetLabelFont(42, "XYZ");
   tdrStyle->SetLabelOffset(0.007, "XYZ");
-  tdrStyle->SetLabelSize(0.05, "XYZ");
+  tdrStyle->SetLabelSize(0.04, "XYZ");
 
 // For the axis:
 
   tdrStyle->SetAxisColor(1, "XYZ");
   tdrStyle->SetStripDecimals(kTRUE);
   tdrStyle->SetTickLength(0.03, "XYZ");
-  tdrStyle->SetNdivisions(510, "XYZ");
+  tdrStyle->SetNdivisions(509, "Y");
+  tdrStyle->SetNdivisions(510, "XZ");
   tdrStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
   tdrStyle->SetPadTickY(1);
+  TGaxis::SetExponentOffset(-0.09, .015, "y");
 
 // Change for log plots:
   tdrStyle->SetOptLogx(0);
