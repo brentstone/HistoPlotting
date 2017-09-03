@@ -34,6 +34,7 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, doubl
     } else {
       if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt = "E";
       if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
+      if(drawables[iD].drawOpt.Contains("X",TString::kIgnoreCase)) opt += "L";
       else opt += "L";
     }
 
