@@ -101,7 +101,7 @@ private:
 
   static int nGraphs;
 
-  const float labelSF = 1.15; //text size scale up...for what doesnt work in the stylesheet
+  const float labelSF = 1.0; //text size scale up...for what doesnt work in the stylesheet
 };
 
 
