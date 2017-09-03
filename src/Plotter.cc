@@ -11,6 +11,7 @@ void Plotter::addDrawable(Drawing::Drawable1D& input) {
 TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
 	TGraph * h = new TGraphAsymmErrors(hist->GetN(),hist->GetX(),hist->GetY(),hist->GetEXlow(),hist->GetEXhigh(),hist->GetEYlow(),hist->GetEYhigh());
 	h->SetHistogram((TH1F*)hist->GetHistogram()->Clone(TString::Format("Plotter::addGraph::histogram::%u",nGraphs)));
+	Drawing::applyGStyle(h->GetHistogram());
 	nGraphs++;
 	//style
 	h->SetLineColor(lineColor >= 0 ? lineColor : StyleInfo::getLineColor(hists.size()) );
@@ -37,6 +38,7 @@ TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int
 }
 TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
   TH1* h = (TH1*)hist->Clone();
+  Drawing::applyGStyle(h);
   //style
   h->SetLineColor(lineColor >= 0 ? lineColor : StyleInfo::getLineColor(hists.size()) );
   h->SetLineWidth(lineWidth);
@@ -60,6 +62,7 @@ TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineSt
 
 TH1* Plotter::addStackHist(const TH1 * hist, TString title, int fillColor, int fillStyle, int lineColor, int lineWidth){
   TH1* h = (TH1*)hist->Clone();
+  Drawing::applyGStyle(h);
   if(totStack.type == Drawing::NONE){
 	  totStack.obj = (TH1*)h->Clone();
 	  totStack.type = Drawing::HIST1D;
