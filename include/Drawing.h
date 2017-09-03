@@ -39,6 +39,8 @@ struct PadStyle {
 
 };
 
+void applyGStyle(TH1* h);
+
 TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, double y1, double x2, double y2, int nColumns);
 
 void drawPane(TPad * pad, std::vector<Drawable1D>& drawables, PadStyle * style, bool doBuildLegend);

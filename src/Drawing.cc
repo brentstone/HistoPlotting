@@ -3,6 +3,7 @@
 #include <TGraphAsymmErrors.h>
 #include "TCanvas.h"
 #include "TLatex.h"
+#include "TStyle.h"
 #include <iostream>
 
 namespace Drawing{
@@ -127,5 +128,27 @@ TCanvas* setupSinglePaneCanvas(TString printName, const PadStyle * style){
 	if(style->botMarginSize >= 0) c->SetBottomMargin(style->botMarginSize);
 
 	return c;
+}
+
+void applyGStyle(TH1* h){
+
+    auto applyToAxis = [&](TAxis* axis, TString axL){
+        axis->SetTitleColor(gStyle->GetTitleColor(axL));
+        axis->SetTitleFont   (gStyle->GetTitleFont  (axL));
+        axis->SetTitleSize   (gStyle->GetTitleSize  (axL));
+        axis->SetTitleFont   (gStyle->GetTitleFont  (axL));
+        axis->SetTitleSize   (gStyle->GetTitleSize  (axL));
+        axis->SetLabelColor  (gStyle->GetLabelColor (axL));
+        axis->SetLabelFont   (gStyle->GetLabelFont  (axL));
+        axis->SetLabelOffset (gStyle->GetLabelOffset(axL));
+        axis->SetLabelSize   (gStyle->GetLabelSize  (axL));
+        axis->SetAxisColor   (gStyle->GetAxisColor  (axL));
+        axis->SetTickLength  (gStyle->GetTickLength (axL));
+        axis->SetNdivisions  (gStyle->GetNdivisions (axL));
+    };
+    applyToAxis(h->GetXaxis(),"X");
+    applyToAxis(h->GetYaxis(),"Y");
+    h->GetXaxis()->SetTitleOffset(gStyle->GetTitleXOffset());
+    h->GetYaxis()->SetTitleOffset(gStyle->GetTitleYOffset());
 }
 }
