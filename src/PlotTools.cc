@@ -79,10 +79,21 @@ namespace PlotTools {
     float x[npoints], y[npoints], errx[npoints], erryl[npoints], erryh[npoints];
     float npass = 0.0;
     float ntotal = 0.0;
+
+    const bool scaleErrors = num->GetSumw2()->GetSize() && den->GetSumw2()->GetSize();
+
     for(int ibin = 1; ibin < npoints+1; ibin++) {
       x[ibin-1] = den->GetBinCenter(ibin);
       npass = num->GetBinContent(ibin);
       ntotal = den->GetBinContent(ibin);
+
+      //If it is a weighted histogram...correct for it
+      if(scaleErrors && den->GetSumw2()->fArray[ibin]) {
+          const float sf =  ntotal/den->GetSumw2()->fArray[ibin];
+          npass *= sf;
+          ntotal *= sf;
+      }
+
       y[ibin-1] = ntotal < 1.0 ? 0.0 : npass/ntotal;
       errx[ibin-1] = den->GetBinWidth(ibin)/2;
       if(y[ibin-1]==0.0) {
