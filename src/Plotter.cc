@@ -53,8 +53,8 @@ TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineSt
     h->SetMarkerSize(0);
   }
   if(drawOption == ""){
-    if(drawErrorBars) drawOption = "E1X0 ";
-    if(drawMarker) drawOption += "P ";
+    if(drawErrorBars) drawOption = "E ";
+    if(drawMarker) drawOption += "X P";
   }
   hists.emplace_back(drawOption,title,Drawing::HIST1D,h,poissonErrors);
   return h;
