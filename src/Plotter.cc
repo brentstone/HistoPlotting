@@ -27,7 +27,7 @@ TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int
 		h->SetMarkerSize(0);
 	}
 	  if(drawOption == ""){
-	    if(drawErrorBars) drawOption = "E 0 ";
+	    if(drawErrorBars) drawOption = "E 0 Z ";
 	    if(drawMarker) drawOption += "P ";
 	    else drawOption += "L ";
 	  }
