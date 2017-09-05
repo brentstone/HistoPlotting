@@ -30,6 +30,7 @@ void StyleInfo::CMS_lumi( TPad* pad, int iPosX, TString lumiText, TString extraT
 	bool writeExtraText = extraText == "" ? false : true;
 //	TString extraText   = "Preliminary";
 	float extraTextFont = 52;  // default is helvetica-italics
+	// float extraTextFont = 42;  // default is helvetica-non italic for TDR
 
 	// text sizes and text offsets with respect to the top frame
 	// in unit of the top margin size
