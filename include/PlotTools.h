@@ -19,6 +19,7 @@ namespace PlotTools {
   //returns the size of the (lower,upper) error bars
   std::pair<double,double> getBinomError(const double num, const double den);
   TGraphAsymmErrors* getBinomErrors(const TH1* num, const TH1* den);
+  void getPoissonErrors(const unsigned int N, double& eU, double& eD);
   TGraphAsymmErrors* getPoissonErrors(const TH1* hist);
   TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hnum, const TH1* hden);
   void getRatioPoissonErrors(int dN, double mN, double mE, double& eL, double& eH);

@@ -112,15 +112,23 @@ namespace PlotTools {
     return gr;
   }
   
+  void getPoissonErrors(const unsigned int N, double& eU, double& eD){
+      const double alpha = 1 - 0.6827;
+      double L =  (N == 0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
+      double U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;
+      eU =  U - double(N);
+      eD =  double(N)- L;
+  }
+
   TGraphAsymmErrors* getPoissonErrors(const TH1* h){
     TGraphAsymmErrors* gr = new TGraphAsymmErrors(h);
-    const double alpha = 1 - 0.6827;
+
     for(int ibin = 0; ibin < gr->GetN(); ++ibin) {
       int dN = gr->GetY()[ibin];
-      double L =  (dN == 0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,dN,1.));
-      double U =  ROOT::Math::gamma_quantile_c(alpha/2,dN+1,1) ;
-      gr->SetPointEYhigh(ibin, U - double(dN));
-      gr->SetPointEYlow(ibin, double(dN)- L);
+      double eU,eD;
+      getPoissonErrors(dN,eU,eD);
+      gr->SetPointEYhigh(ibin, eU);
+      gr->SetPointEYlow(ibin, eD);
       if(dN == 0) {
         gr->SetPointEXlow(ibin, 0);
         gr->SetPointEXhigh(ibin, 0);
