@@ -51,7 +51,7 @@ public:
   //Style accessors
   void setMinMax(double iMin, double iMax) {topStyle.yAxis_min = iMin; topStyle.yAxis_max= iMax;}
   void setBotMinMax(double iMin, double iMax) {botStyle.yAxis_min = iMin; botStyle.yAxis_max= iMax;}
-  void setXTitle(TString title) {topStyle.xTitle = title;}
+  void setXTitle(TString title) {topStyle.xTitle = title;botStyle.xTitle = title;}
   void setYTitle(TString title) {topStyle.yTitle = title;}
   void setYTitleBot(TString title) {botStyle.yTitle = title;}
   void setLegendPos(float x1, float y1, float x2, float y2)
@@ -80,6 +80,8 @@ public:
   TAxis * yAxis() {return topStyle.yAxis;}
   TAxis * botXAxis() {return botStyle.xAxis;}
   TAxis * botYAxis() {return botStyle.yAxis;}
+
+  std::vector<Drawing::Drawable1D>& getHists() {return hists;}
 
 
 private:

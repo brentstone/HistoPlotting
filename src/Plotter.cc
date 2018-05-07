@@ -1,5 +1,6 @@
 #include "THStack.h"
 #include "TFrame.h"
+#include "TGraphErrors.h"
 #include "../include/Plotter.h"
 #include "../include/StyleInfo.h"
 #include "../include/PlotTools.h"
@@ -9,7 +10,16 @@ void Plotter::addDrawable(Drawing::Drawable1D& input) {
 	hists.push_back(newDrawable);
 }
 TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
-	TGraph * h = new TGraphAsymmErrors(hist->GetN(),hist->GetX(),hist->GetY(),hist->GetEXlow(),hist->GetEXhigh(),hist->GetEYlow(),hist->GetEYhigh());
+    TGraph * h = 0;
+    if (  dynamic_cast<const TGraphAsymmErrors*>(hist) )
+    {
+       h  = new TGraphAsymmErrors(hist->GetN(),hist->GetX(),hist->GetY(),hist->GetEXlow(),hist->GetEXhigh(),hist->GetEYlow(),hist->GetEYhigh());
+    } else if(dynamic_cast<const TGraphErrors*>(hist)){
+        h  = new TGraphErrors(hist->GetN(),hist->GetX(),hist->GetY(),hist->GetEX(),hist->GetEY());
+    } else {
+        h  = new TGraph(hist->GetN(),hist->GetX(),hist->GetY());
+    }
+
 	h->SetHistogram((TH1F*)hist->GetHistogram()->Clone(TString::Format("Plotter::addGraph::histogram::%u",nGraphs)));
 	Drawing::applyGStyle(h->GetHistogram());
 	nGraphs++;
@@ -177,6 +187,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
 
   TCanvas * c =new TCanvas(printName,printName);
   TPad *pad1 = new TPad("pad1", "pad1", 0, 0.33, 1, 1.0);
+  pad1->SetNumber(1);
   pad1->SetBottomMargin(.025); // Upper and lower plot are joined
   pad1->SetTopMargin(.1);
   pad1->SetLeftMargin(.14);
@@ -186,7 +197,6 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   prepHist(drawables);
   Drawing::drawPane(pad1,drawables,&topStyle,true);
   topStyle.xAxis->SetLabelOffset(2);
-
 
   topStyle.yAxis->SetLabelSize(topStyle.yAxis->GetLabelSize()*topScale );
   topStyle.yAxis->SetTitleOffset(topStyle.yAxis->GetTitleOffset());
@@ -200,6 +210,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
 
   c->cd();
   TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.33);
+  pad2->SetNumber(2);
   pad2->SetTopMargin(.005);
   pad2->SetLeftMargin(.14);
   pad2->SetBottomMargin(.3);
@@ -211,19 +222,19 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
   Drawing::drawPane(pad2,ratDrawables,&botStyle,false);
   double botScale = labelSF*(1/.33);
-  botStyle.yAxis->SetLabelSize(botStyle.yAxis->GetLabelSize()*botScale);
-  botStyle.yAxis->SetTitleSize(botStyle.yAxis->GetTitleSize()*botScale);
-  botStyle.yAxis->SetTitleOffset(botStyle.yAxis->GetTitleOffset()*.33/.66);
-  botStyle.xAxis->SetLabelSize(botStyle.xAxis->GetLabelSize()*botScale);
-  botStyle.xAxis->SetTitleSize(botStyle.xAxis->GetTitleSize()*botScale);
 
-  botStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : botStyle.yTitle.Data());
+  botStyle.yAxis->SetTitle(botStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : botStyle.yTitle.Data());
   if(stackHists.size()){
-    botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0].getXTitle() : botStyle.xTitle.Data());
+    botStyle.xAxis->SetTitle(botStyle.xTitle == "DEF" ? stackHists[0].getXTitle() : botStyle.xTitle.Data());
   } else {
-    botStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? hists[0].getXTitle()  : botStyle.xTitle.Data());
+    botStyle.xAxis->SetTitle(botStyle.xTitle == "DEF" ? hists[0].getXTitle()  : botStyle.xTitle.Data());
   }
 
+  botStyle.yAxis->SetTitleSize(botScale*botStyle.yAxis->GetTitleSize());
+  botStyle.xAxis->SetTitleSize(botScale*botStyle.xAxis->GetTitleSize());
+  botStyle.yAxis->SetLabelSize(botScale*botStyle.yAxis->GetLabelSize());
+  botStyle.xAxis->SetLabelSize(botScale*botStyle.xAxis->GetLabelSize());
+  botStyle.yAxis->SetTitleOffset(.33/.66*botStyle.yAxis->GetTitleOffset());
 
   if(topStyle.addCMSLumi){
       StyleInfo::CMS_lumi(pad1, topStyle.cmsLumiPos, topStyle.lumiText, topStyle.extraText, topStyle.extraTextOff );
@@ -280,8 +291,10 @@ void Plotter::prepHist(std::vector<Drawing::Drawable1D>& drawables){
 	if(hists.size())
 //		for(int iH = hists.size() -1; iH >= 0; --iH){
 		for(unsigned int iH = 0; iH <  hists.size() ; ++iH){
-			if(hists[iH].doPoisson) drawables.push_back(Drawing::convertToPoisson(hists[iH]));
-			else drawables.push_back(hists[iH]);
+		    Drawing::Drawable1D newdrawable = hists[iH];
+		    newdrawable.obj = hists[iH].obj->Clone();
+			if(hists[iH].doPoisson) drawables.push_back(Drawing::convertToPoisson(newdrawable));
+			else drawables.push_back(newdrawable);
 		}
 }
 
@@ -307,7 +320,8 @@ TString Plotter::prepRat(std::vector<Drawing::Drawable1D>& drawables, int denIDX
 
 	if(denIDX >= 0 && totStack.obj) drawables.push_back(Drawing::makeRatio((TH1*)totStack.obj, den,stackTitle,"",doBinomErrors));
 	if(hists.size())
-		for(int iH = hists.size() -1; iH >= 0; --iH){
+	    for(unsigned int iH = 0; iH <  hists.size() ; ++iH){
+//		for(int iH = hists.size() -1; iH >= 0; --iH){
 			if(int(iH) == denIDX) continue;
 			drawables.push_back(Drawing::makeRatio(hists[iH], den,doBinomErrors));
 		}
