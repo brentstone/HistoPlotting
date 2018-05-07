@@ -15,4 +15,9 @@
 
 #pragma link C++ namespace StyleInfo;
 #pragma link C++ function StyleInfo::getLineColor;
+
+#pragma link C++ namespace Drawing;
+#pragma link C++ function Drawing::newAlbum;
+#pragma link C++ function Drawing::drawAll;
+
 #endif
