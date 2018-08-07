@@ -9,7 +9,7 @@ void Plotter::addDrawable(Drawing::Drawable1D& input) {
 	newDrawable.obj = newDrawable.obj->Clone();
 	hists.push_back(newDrawable);
 }
-TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
+TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, double markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
     TGraph * h = 0;
     if (  dynamic_cast<const TGraphAsymmErrors*>(hist) )
     {
@@ -19,6 +19,8 @@ TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int
     } else {
         h  = new TGraph(hist->GetN(),hist->GetX(),hist->GetY());
     }
+    h->SetFillColor(hist->GetFillColor());
+    h->SetFillStyle(hist->GetFillStyle());
 
 	h->SetHistogram((TH1F*)hist->GetHistogram()->Clone(TString::Format("Plotter::addGraph::histogram::%u",nGraphs)));
 	Drawing::applyGStyle(h->GetHistogram());
@@ -46,7 +48,7 @@ TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int
 	  hists.back().graphAxisHist = h->GetHistogram();
 	  return h;
 }
-TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, int markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
+TH1* Plotter::addHist(const TH1 * hist, TString title, int lineColor, int lineStyle, int lineWidth, int markerStyle, double markerSize, bool drawMarker, bool drawErrorBars, bool poissonErrors, TString drawOption){
   TH1* h = (TH1*)hist->Clone();
   Drawing::applyGStyle(h);
   //style
@@ -243,7 +245,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
       pad1->GetFrame()->Draw();
   }
 
-  Drawing::drawTLatex(c,textList);
+  Drawing::drawTLatex(pad1,textList);
 
 
   if(save) c->Print(printName);

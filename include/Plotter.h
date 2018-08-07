@@ -23,9 +23,9 @@ public:
 
   //Adding content...must be done before drawing!
   void addDrawable(Drawing::Drawable1D& input);
-  TGraph* addGraph(const TGraph * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
+  TGraph* addGraph(const TGraph * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, double markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
   TGraph* addGraphLine(const TGraph * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4){return addGraph(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
-  TH1* addHist(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, int markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
+  TH1* addHist(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4, int markerStyle = 20, double markerSize = 1,  bool drawMarker = true, bool drawErrorBars = true,bool poissonErrors = false, TString drawOption = "");
   TH1* addHistLine(const TH1 * hist, TString title, int lineColor = -1, int lineStyle = 1, int lineWidth = 4){return addHist(hist,title,lineColor,lineStyle,lineWidth,20,1,false,false);}
   TH1* addStackHist(const TH1 * hist, TString title, int fillColor =-1, int fillStyle =1001, int lineColor = 1, int lineWidth =2);
   void addText(TString text, float posX=0.5, float posY =0.5, float textSize = -1, int color = -1, int angle = -1, int font = -1 ) //negative means default
