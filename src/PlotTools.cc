@@ -121,37 +121,41 @@ namespace PlotTools {
   }
 
   TGraphAsymmErrors* getPoissonErrors(const TH1* h){
-    TGraphAsymmErrors* gr = new TGraphAsymmErrors(h);
-
-    for(int ibin = 0; ibin < gr->GetN(); ++ibin) {
-      int dN = gr->GetY()[ibin];
-      double eU,eD;
-      getPoissonErrors(dN,eU,eD);
-      gr->SetPointEYhigh(ibin, eU);
-      gr->SetPointEYlow(ibin, eD);
-      if(dN == 0) {
-        gr->SetPointEXlow(ibin, 0);
-        gr->SetPointEXhigh(ibin, 0);
+      TGraphAsymmErrors* gr = new TGraphAsymmErrors();
+      int curPt = 0;
+      for(int ibin = 1; ibin <= h->GetNbinsX(); ++ibin){
+         int dN = h->GetBinContent(ibin);
+         if(dN < 0) continue;
+         double eU,eD;
+         getPoissonErrors(dN,eU,eD);
+         gr->SetPoint(curPt,h->GetBinCenter(ibin),dN);
+         gr->SetPointEYhigh(curPt, eU);
+         gr->SetPointEYlow(curPt, eD);
+         if(dN == 0) {
+           gr->SetPointEXlow(curPt, 0);
+           gr->SetPointEXhigh(curPt, 0);
+         }
+         curPt++;
       }
-    }
     return gr;
   }
 
   TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hD, const TH1* hM) {
-
-    TGraphAsymmErrors* gr = new TGraphAsymmErrors(hD);
-    for(int ibin = 0; ibin < gr->GetN(); ++ibin) {
-      int dN = gr->GetY()[ibin];
-      double mN = hM->GetBinContent(ibin+1);
-      double mE = hM->GetBinError(ibin+1);
-      double eL = 0, eH = 0;
-      gr->SetPoint(ibin, gr->GetX()[ibin], double(dN)/mN);
-      getRatioPoissonErrors(dN, mN, mE, eL, eH);
-      gr->SetPointEYhigh(ibin, eH);
-      gr->SetPointEYlow(ibin, eL);
-    }
+      TGraphAsymmErrors* gr = new TGraphAsymmErrors();
+      int curPt = 0;
+      for(int ibin = 1; ibin <= hD->GetNbinsX(); ++ibin){
+          int dN = hD->GetBinContent(ibin);
+          if(dN < 0) continue;
+          double mN = hM->GetBinContent(ibin);
+          double mE = hM->GetBinError(ibin);
+          double eL = 0, eH = 0;
+          gr->SetPoint(curPt, hD->GetBinCenter(ibin), double(dN)/mN);
+          getRatioPoissonErrors(dN, mN, mE, eL, eH);
+          gr->SetPointEYhigh(curPt, eH);
+          gr->SetPointEYlow(curPt, eL);
+          curPt++;
+      }
     return gr;
-
   }
 
   void getRatioPoissonErrors(int dN, double mN, double mE, double& eL, double& eH){

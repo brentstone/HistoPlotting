@@ -33,6 +33,8 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, doubl
       if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
       if(drawables[iD].drawOpt.Contains("L",TString::kIgnoreCase)) opt += "L";
       if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt += "L";
+      if(drawables[iD].drawOpt.Contains("3",TString::kIgnoreCase)) opt += "F";
+      if(drawables[iD].drawOpt.Contains("4",TString::kIgnoreCase)) opt += "F";
     } else {
       if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt = "E";
       if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
@@ -53,6 +55,7 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, doubl
 }
 
 
+
 void drawPane(TPad * pad, std::vector<Drawable1D>& drawables, PadStyle * style, bool doBuildLegend){
   if(!drawables.size()) throw std::invalid_argument("Drawing::drawPane -> Need to provide histograms");;;
   if(doBuildLegend) style->legend = buildLegend(drawables, style->leg_x1,style->leg_y1, style->leg_x2,style->leg_y2, style->leg_nColumns);
@@ -60,33 +63,47 @@ void drawPane(TPad * pad, std::vector<Drawable1D>& drawables, PadStyle * style, 
   for(const auto& d : drawables) max = std::max(max,getMax(d));
   pad->cd();
   //Initial drawing with axis
-  Drawable1D * first = &drawables[0];
-  if(first->type == Drawing::STACK){
-    THStack * h = (THStack*)first->obj;
-    h->Draw("HIST");
-    style->xAxis = h->GetXaxis();
-    style->yAxis = h->GetYaxis();
-    h->SetMinimum(style->yAxis_min);
-    h->SetMaximum(style->yAxis_max < 0 ? max*1.15 : style->yAxis_max);
+  auto procAxis = [&] (Drawable1D * first ){
+      if(first->type == Drawing::STACK){
+        THStack * h = (THStack*)first->obj;
+        h->Draw("HIST");
+        style->xAxis = h->GetXaxis();
+        style->yAxis = h->GetYaxis();
+        h->SetMinimum(style->yAxis_min);
+        h->SetMaximum(style->yAxis_max < 0 ? max*1.15 : style->yAxis_max);
+      }
+      if(first->type == Drawing::HIST1D){
+        TH1 * h = (TH1*)first->obj;
+        h->Draw("AXIS");
+        style->xAxis = h->GetXaxis();
+        style->yAxis = h->GetYaxis();
+        h->SetMinimum(style->yAxis_min);
+        h->SetMaximum(style->yAxis_max < 0 ? max*1.15 : style->yAxis_max);
+      }
+      if(first->type == Drawing::GRAPH){
+        auto h = first->graphAxisHist;
+        h->Draw("AXIS");
+        style->xAxis = h->GetXaxis();
+        style->yAxis = h->GetYaxis();
+        h->SetMinimum(style->yAxis_min);
+        h->SetMaximum(style->yAxis_max < 0 ? max*1.15 : style->yAxis_max);
+      }
+  };
+
+  //do the axis first
+  bool filled = false;
+  for(auto& d : drawables ){
+      if(d.type == Drawing::GRAPH) continue;
+      procAxis(&d);
+      filled = true;
+      break;
   }
-  if(first->type == Drawing::HIST1D){
-    TH1 * h = (TH1*)first->obj;
-    h->Draw(TString::Format("HIST %s",first->drawOpt.Data()));
-    style->xAxis = h->GetXaxis();
-    style->yAxis = h->GetYaxis();
-    h->SetMinimum(style->yAxis_min);
-    h->SetMaximum(style->yAxis_max < 0 ? max*1.15 : style->yAxis_max);
-  }
-  if(first->type == Drawing::GRAPH){
-    first->graphAxisHist->Draw("AXIS");
-    TGraphAsymmErrors * h = (TGraphAsymmErrors*)first->obj;
-    h->Draw(TString::Format("SAME %s",first->drawOpt.Data()));
-    style->xAxis = first->graphAxisHist->GetXaxis();
-    style->yAxis = first->graphAxisHist->GetYaxis();
-    first->graphAxisHist->SetMinimum(style->yAxis_min);
-    first->graphAxisHist->SetMaximum(style->yAxis_max < 0 ? max*1.15 : style->yAxis_max);
-  }
-  for(unsigned int iD = 1; iD < drawables.size(); ++iD){
+  if(!filled)
+      for(auto& d : drawables ){
+          procAxis(&d);
+          break;
+      }
+  for(unsigned int iD = 0; iD < drawables.size(); ++iD){
     Drawable1D * draw = &drawables[iD];
     if(draw->type == Drawing::HIST1D){
       TH1 * h = (TH1*)draw->obj;
