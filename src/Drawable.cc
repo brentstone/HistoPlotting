@@ -67,7 +67,7 @@ Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors) 
     else if(num.type == GRAPH) {
         auto gr = (TGraphAsymmErrors*) num.obj->Clone();
         std::vector<int> zerPts;
-        for(unsigned int iP = 0; iP < gr->GetN();++iP){
+        for(int iP = 0; iP < gr->GetN();++iP){
 
             double x,y;
             gr->GetPoint(iP,x,y);
@@ -92,7 +92,7 @@ Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors) 
         newDrawable.type = GRAPH;
         newDrawable.drawOpt = num.drawOpt;
         newDrawable.obj = gr;
-        newDrawable.graphAxisHist = (TH1*)num.graphAxisHist->Clone();
+        newDrawable.graphAxisHist = (TH1*)den->Clone(TString::Format("%s_grcp",gr->GetName()));
 
     } else if(num.type==HIST1D){
         TH1* hist = (TH1*)num.obj->Clone();

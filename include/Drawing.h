@@ -8,6 +8,7 @@
 #include <TPad.h>
 namespace Drawing {
 typedef std::tuple<TString,float,float,float,int,float,int> TLatexDef; //string posx, posy, size color angle font
+typedef std::tuple<int,const TObject *,TString,TString> TLegendEntryDef; //string posx, posy, size color angle font
 
 struct PadStyle {
   TString   xTitle          ="DEF";
@@ -41,9 +42,9 @@ struct PadStyle {
 
 void applyGStyle(TH1* h);
 
-TLegend * buildLegend(const std::vector<Drawable1D>& drawables, double x1, double y1, double x2, double y2, int nColumns);
+TLegend * buildLegend(const std::vector<Drawable1D>& drawables,const std::vector<TLegendEntryDef>& exEntries, double x1, double y1, double x2, double y2, int nColumns);
 
-void drawPane(TPad * pad, std::vector<Drawable1D>& drawables, PadStyle * style, bool doBuildLegend);
+void drawPane(TPad * pad, std::vector<Drawable1D>& drawables,std::vector<TLegendEntryDef>& exEntries, PadStyle * style, bool doBuildLegend);
 void drawTLatex(TPad * pad, const std::vector<TLatexDef>& textList);
 
 TCanvas * setupSinglePaneCanvas(TString printName, const PadStyle * style);

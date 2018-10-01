@@ -57,6 +57,8 @@ public:
   void setLegendPos(float x1, float y1, float x2, float y2)
   {topStyle.leg_x1 = x1;topStyle.leg_x2 = x2;topStyle.leg_y1 = y1;topStyle.leg_y2 = y2;}
   void setLegendNColumns(int nCol = 1) {topStyle.leg_nColumns = nCol;}
+  void addLegendEntry(int pos,const TObject *   obj=0,const TString& label = "", const TString& option = "lpf" )
+  {extraLegendList.push_back(std::make_tuple(pos,obj,label,option));}
 
 
 
@@ -100,6 +102,7 @@ private:
   std::vector<Drawing::Drawable1D> hists;
   std::vector<Drawing::Drawable1D> stackHists;
   std::vector<Drawing::TLatexDef> textList;
+  std::vector<Drawing::TLegendEntryDef> extraLegendList;
 
   static int nGraphs;
 
