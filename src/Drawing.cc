@@ -46,8 +46,10 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables,const std::vector
             if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
             if(drawables[iD].drawOpt.Contains("L",TString::kIgnoreCase)) opt += "L";
             if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt += "L";
+            if(drawables[iD].drawOpt.Contains("2",TString::kIgnoreCase)) opt += "F";
             if(drawables[iD].drawOpt.Contains("3",TString::kIgnoreCase)) opt += "F";
             if(drawables[iD].drawOpt.Contains("4",TString::kIgnoreCase)) opt += "F";
+            if(drawables[iD].drawOpt.Contains("5",TString::kIgnoreCase)) opt += "F";
         } else {
             if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt = "E";
             if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
