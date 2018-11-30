@@ -41,7 +41,7 @@ TGraph* Plotter::addGraph(const TGraph * hist, TString title, int lineColor, int
 	  if(drawOption == ""){
 	    if(drawErrorBars) drawOption = "E 0 Z ";
 	    if(drawMarker) drawOption += "P ";
-	    else drawOption += "L ";
+	    else drawOption += "L HIST";
 	  }
 
 	  hists.emplace_back(drawOption,title,Drawing::GRAPH,h,poissonErrors);
@@ -284,10 +284,12 @@ void Plotter::prepHist(std::vector<Drawing::Drawable1D>& drawables){
 	if(doUnderflow){
 		for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::toUnderflow((TH1*)h.obj);
 		for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::toUnderflow((TH1*)h.obj);
+		if(totStack.obj) PlotTools::toUnderflow((TH1*)totStack.obj);
 	}
 	if(doOverflow){
 		for(auto& h : hists) if(h.type == Drawing::HIST1D) PlotTools::toOverflow((TH1*)h.obj);
 		for(auto& h : stackHists) if(h.type == Drawing::HIST1D) PlotTools::toOverflow((TH1*)h.obj);
+		if(totStack.obj) PlotTools::toOverflow((TH1*)totStack.obj);
 	}
 	if(stackHists.size())drawables.push_back(Drawing::makeStack(stackHists,totStack));
 	if(hists.size())
