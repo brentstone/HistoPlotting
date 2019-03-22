@@ -11,10 +11,12 @@ typedef std::tuple<TString,float,float,float,int,float,int> TLatexDef; //string 
 typedef std::tuple<int,const TObject *,TString,TString> TLegendEntryDef; //string posx, posy, size color angle font
 
 struct PadStyle {
+    PadStyle(bool drawLegend=true) : drawLegend(drawLegend) {}
   TString   xTitle          ="DEF";
   TString   yTitle          = "DEF";
   double    yAxis_min       =0;
   double    yAxis_max       =-1; //if -1 use default
+  bool      drawLegend      = true;
   double    leg_x1          = 0.65;
   double    leg_y1          = -0.045;//make it positive if you dont want it to be dynamic
   double    leg_x2          = 0.93;
@@ -44,7 +46,7 @@ void applyGStyle(TH1* h);
 
 TLegend * buildLegend(const std::vector<Drawable1D>& drawables,const std::vector<TLegendEntryDef>& exEntries, double x1, double y1, double x2, double y2, int nColumns);
 
-void drawPane(TPad * pad, std::vector<Drawable1D>& drawables,std::vector<TLegendEntryDef>& exEntries, PadStyle * style, bool doBuildLegend);
+void drawPane(TPad * pad, std::vector<Drawable1D>& drawables,std::vector<TLegendEntryDef>& exEntries, PadStyle * style);
 void drawTLatex(TPad * pad, const std::vector<TLatexDef>& textList);
 
 TCanvas * setupSinglePaneCanvas(TString printName, const PadStyle * style);

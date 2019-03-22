@@ -45,6 +45,7 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables,const std::vector
             if(drawables[iD].drawOpt.Contains("0",TString::kIgnoreCase)) opt = "E";
             if(drawables[iD].drawOpt.Contains("P",TString::kIgnoreCase)) opt += "P";
             if(drawables[iD].drawOpt.Contains("L",TString::kIgnoreCase)) opt += "L";
+            if(drawables[iD].drawOpt.Contains("C",TString::kIgnoreCase)) opt += "L";
             if(drawables[iD].drawOpt.Contains("E",TString::kIgnoreCase)) opt += "L";
             if(drawables[iD].drawOpt.Contains("2",TString::kIgnoreCase)) opt += "F";
             if(drawables[iD].drawOpt.Contains("3",TString::kIgnoreCase)) opt += "F";
@@ -75,9 +76,9 @@ TLegend * buildLegend(const std::vector<Drawable1D>& drawables,const std::vector
 
 
 
-void drawPane(TPad * pad, std::vector<Drawable1D>& drawables,std::vector<TLegendEntryDef>& exEntries, PadStyle * style, bool doBuildLegend){
+void drawPane(TPad * pad, std::vector<Drawable1D>& drawables,std::vector<TLegendEntryDef>& exEntries, PadStyle * style){
     if(!drawables.size()) throw std::invalid_argument("Drawing::drawPane -> Need to provide histograms");;;
-    if(doBuildLegend) style->legend = buildLegend(drawables,exEntries, style->leg_x1,style->leg_y1, style->leg_x2,style->leg_y2, style->leg_nColumns);
+    if(style->drawLegend) style->legend = buildLegend(drawables,exEntries, style->leg_x1,style->leg_y1, style->leg_x2,style->leg_y2, style->leg_nColumns);
     double max = 0;
     for(const auto& d : drawables) max = std::max(max,getMax(d));
     pad->cd();
@@ -135,7 +136,7 @@ void drawPane(TPad * pad, std::vector<Drawable1D>& drawables,std::vector<TLegend
         }
     }
 
-    if(doBuildLegend)style->legend->Draw();
+    if(style->drawLegend)style->legend->Draw();
 
 }
 

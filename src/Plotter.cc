@@ -99,7 +99,7 @@ TCanvas * Plotter::draw(bool save, TString printName){
 	TCanvas * c =setupSinglePaneCanvas(printName,&topStyle);
 	std::vector<Drawing::Drawable1D> drawables;
 	prepHist(drawables);
-	Drawing::drawPane(c,drawables,extraLegendList,&topStyle,true);
+	Drawing::drawPane(c,drawables,extraLegendList,&topStyle);
 	if(stackHists.size()){
 		topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? stackHists[0].getYTitle() : topStyle.yTitle.Data());
 		topStyle.xAxis->SetTitle(topStyle.xTitle == "DEF" ? stackHists[0].getXTitle() : topStyle.xTitle.Data());
@@ -143,7 +143,7 @@ TCanvas * Plotter::drawRatio(int denIDX, TString stackTitle,bool doBinomErrors, 
   std::vector<Drawing::Drawable1D> ratDrawables;
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
   TCanvas * c =setupSinglePaneCanvas(printName,&topStyle);
-  Drawing::drawPane(c,ratDrawables,extraLegendList,&topStyle,true);
+  Drawing::drawPane(c,ratDrawables,extraLegendList,&topStyle);
 
   topStyle.yAxis->SetTitle(topStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : topStyle.yTitle.Data());
   if(stackHists.size()){
@@ -197,7 +197,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
   pad1->cd();               // pad1 becomes the current pad
   std::vector<Drawing::Drawable1D> drawables;
   prepHist(drawables);
-  Drawing::drawPane(pad1,drawables,extraLegendList,&topStyle,true);
+  Drawing::drawPane(pad1,drawables,extraLegendList,&topStyle);
   topStyle.xAxis->SetLabelOffset(2);
 
   topStyle.yAxis->SetLabelSize(topStyle.yAxis->GetLabelSize()*topScale );
@@ -222,7 +222,7 @@ TCanvas * Plotter::drawSplitRatio(int denIDX, TString stackTitle,bool doBinomErr
 
   std::vector<Drawing::Drawable1D> ratDrawables;
   TString denTitle = prepRat(ratDrawables,denIDX,stackTitle,doBinomErrors);
-  Drawing::drawPane(pad2,ratDrawables,extraLegendList,&botStyle,false);
+  Drawing::drawPane(pad2,ratDrawables,extraLegendList,&botStyle);
   double botScale = labelSF*(1/.33);
 
   botStyle.yAxis->SetTitle(botStyle.yTitle == "DEF" ? TString::Format("N/N(%s)",denTitle.Data()).Data() : botStyle.yTitle.Data());
@@ -330,6 +330,13 @@ TString Plotter::prepRat(std::vector<Drawing::Drawable1D>& drawables, int denIDX
 			drawables.push_back(Drawing::makeRatio(hists[iH], den,doBinomErrors));
 		}
 	return denTitle;
+}
+
+void  Plotter::clearTotStackError()
+{   auto* hT = (TH1*)totStack.obj;
+    for( int iB = 0; iB <= hT->GetNbinsX(); ++iB){
+        hT->SetBinError(iB,0);
+    }
 }
 
 int Plotter::nGraphs = 0;

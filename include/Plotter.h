@@ -39,6 +39,7 @@ public:
 
   float getStackIntegral() const {return totStack.obj ? ((TH1*)totStack.obj)->Integral(0,-1) : 0.0;}
   const TH1 * getTotStack() const {return (const TH1*)totStack.obj;}
+  void  clearTotStackError();
 
   //Drawing options
   void setUnderflow(bool doIt) {doUnderflow = doIt;}
@@ -59,6 +60,7 @@ public:
   void setLegendNColumns(int nCol = 1) {topStyle.leg_nColumns = nCol;}
   void addLegendEntry(int pos,const TObject *   obj=0,const TString& label = "", const TString& option = "lpf" )
   {extraLegendList.push_back(std::make_tuple(pos,obj,label,option));}
+  void turnOffLegend() {topStyle.drawLegend = false;}
 
 
 
@@ -84,6 +86,7 @@ public:
   TAxis * botYAxis() {return botStyle.yAxis;}
 
   std::vector<Drawing::Drawable1D>& getHists() {return hists;}
+  std::vector<Drawing::Drawable1D>& getStackHists() {return stackHists;}
 
 
 private:
@@ -95,8 +98,10 @@ private:
   bool doUnderflow = true;
   bool doOverflow = true;
 
+public:
   Drawing::PadStyle topStyle;
-  Drawing::PadStyle botStyle;
+  Drawing::PadStyle botStyle = Drawing::PadStyle(false);
+private:
 
   Drawing::Drawable1D totStack;
   std::vector<Drawing::Drawable1D> hists;
