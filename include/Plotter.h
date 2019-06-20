@@ -42,6 +42,7 @@ public:
   void  clearTotStackError();
 
   //Drawing options
+  void turnOffTrailingPoissonZeros() {drawTrailingPoissonZeros= false;}
   void setUnderflow(bool doIt) {doUnderflow = doIt;}
   void setOverflow(bool doIt) {doOverflow = doIt;}
   void scale(double scale);
@@ -50,6 +51,8 @@ public:
   void rebin(int n, double * bins);
 
   //Style accessors
+  void setMin(double iMin) {topStyle.yAxis_min = iMin;;}
+  void setMax(double iMax) {topStyle.yAxis_max = iMax;;}
   void setMinMax(double iMin, double iMax) {topStyle.yAxis_min = iMin; topStyle.yAxis_max= iMax;}
   void setBotMinMax(double iMin, double iMax) {botStyle.yAxis_min = iMin; botStyle.yAxis_max= iMax;}
   void setXTitle(TString title) {topStyle.xTitle = title;botStyle.xTitle = title;}
@@ -97,6 +100,7 @@ private:
   //Drawing options
   bool doUnderflow = true;
   bool doOverflow = true;
+  bool drawTrailingPoissonZeros = true;
 
 public:
   Drawing::PadStyle topStyle;

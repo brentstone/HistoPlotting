@@ -297,7 +297,8 @@ void Plotter::prepHist(std::vector<Drawing::Drawable1D>& drawables){
 		for(unsigned int iH = 0; iH <  hists.size() ; ++iH){
 		    Drawing::Drawable1D newdrawable = hists[iH];
 		    newdrawable.obj = hists[iH].obj->Clone();
-			if(hists[iH].doPoisson) drawables.push_back(Drawing::convertToPoisson(newdrawable));
+			if(hists[iH].doPoisson) drawables.push_back(
+			        Drawing::convertToPoisson(newdrawable,drawTrailingPoissonZeros));
 			else drawables.push_back(newdrawable);
 		}
 }
@@ -322,12 +323,14 @@ TString Plotter::prepRat(std::vector<Drawing::Drawable1D>& drawables, int denIDX
 		denTitle = hists[denIDX].title;
 	} else {throw std::invalid_argument("Plotter::prepRat -> Need to provide a denominator");;}
 
-	if(denIDX >= 0 && totStack.obj) drawables.push_back(Drawing::makeRatio((TH1*)totStack.obj, den,stackTitle,"",doBinomErrors));
+	if(denIDX >= 0 && totStack.obj) drawables.push_back(Drawing::makeRatio((TH1*)totStack.obj, den,
+	        stackTitle,"",doBinomErrors,drawTrailingPoissonZeros));
 	if(hists.size())
 	    for(unsigned int iH = 0; iH <  hists.size() ; ++iH){
 //		for(int iH = hists.size() -1; iH >= 0; --iH){
 			if(int(iH) == denIDX) continue;
-			drawables.push_back(Drawing::makeRatio(hists[iH], den,doBinomErrors));
+			drawables.push_back(Drawing::makeRatio(hists[iH], den,
+			        doBinomErrors,drawTrailingPoissonZeros));
 		}
 	return denTitle;
 }

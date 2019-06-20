@@ -47,10 +47,14 @@ struct Drawable1D {
 Drawable1D  makeStack(std::vector<Drawable1D>& hists,Drawable1D& totStack);
 Drawable1D  makeStack(std::vector<TH1*>& hists,std::vector<TString>& titles, TH1 * totStack);
 
-Drawable1D  convertToPoisson(Drawable1D& input); //To do the error conversion
-Drawable1D  makeHist(TH1* hist, TString title, TString drawOpt, bool doPoissonErrors = false);
-Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors = false);
-Drawable1D  makeRatio(TH1* num, const TH1 * den, TString title, TString drawOpt = "", bool doBinomErrors = false, bool doPoissonErrors = false);
+Drawable1D  convertToPoisson(Drawable1D& input, bool drawTrailingZeros); //To do the error conversion
+Drawable1D  makeHist(TH1* hist, TString title, TString drawOpt, bool doPoissonErrors = false,
+        const bool drawTrailingPoissonZeros = true);
+Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors = false,
+        const bool drawTrailingPoissonZeros= true);
+Drawable1D  makeRatio(TH1* num, const TH1 * den, TString title, TString drawOpt = "",
+        bool doBinomErrors = false, bool doPoissonErrors = false,
+        const bool drawTrailingPoissonZeros =true);
 double      getMax(const Drawable1D& drawable);
 
 }

@@ -20,11 +20,13 @@ namespace PlotTools {
   std::pair<double,double> getBinomError(const double num, const double den);
   TGraphAsymmErrors* getBinomErrors(const TH1* num, const TH1* den);
   void getPoissonErrors(const unsigned int N, double& eU, double& eD);
-  TGraphAsymmErrors* getPoissonErrors(const TH1* hist);
-  TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hnum, const TH1* hden);
+  TGraphAsymmErrors* getPoissonErrors(const TH1* hist, const bool drawTrailingZeros);
+  TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hnum, const TH1* hden,
+          const bool drawTrailingZeros);
   void getRatioPoissonErrors(int dN, double mN, double mE, double& eL, double& eH);
 
-  TGraph* getRocCurve(const TH1* xHist, const TH1 * yHist, bool cutGreaterThan, TString xName="", TString yName ="");
+  TGraph* getRocCurve(const TH1* xHist, const TH1 * yHist, bool cutGreaterThan,
+          TString xName="", TString yName ="");
   TH1* getIntegral(const TH1* hist, bool greaterThan, bool normalize = false);
 }
 

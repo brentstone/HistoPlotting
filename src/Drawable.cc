@@ -29,12 +29,12 @@ Drawable1D  makeStack(std::vector<TH1*>& hists,std::vector<TString>& titles, TH1
     return makeStack(histDs,totD);
 }
 
-Drawable1D  convertToPoisson(Drawable1D& input) {
+Drawable1D  convertToPoisson(Drawable1D& input, bool drawTrailingZeros) {
     Drawable1D newDrawable;
     if(input.type != HIST1D) return input;
     if(!input.doPoisson) return input;
     TH1 * hist = (TH1*)input.obj;
-    auto * graph = PlotTools::getPoissonErrors(hist);
+    auto * graph = PlotTools::getPoissonErrors(hist,drawTrailingZeros);
     graph->SetLineColor  (hist->GetLineColor());
     graph->SetLineWidth  (hist->GetLineWidth());
     graph->SetLineStyle  (hist->GetLineStyle());
@@ -50,15 +50,17 @@ Drawable1D  convertToPoisson(Drawable1D& input) {
     return newDrawable;
 
 }
-Drawable1D  makeHist(TH1* hist, TString title, TString drawOpt, bool doPoissonErrors){
+Drawable1D  makeHist(TH1* hist, TString title, TString drawOpt,
+        bool doPoissonErrors,const bool drawTrailingPoissonZeros){
     Drawable1D newDrawable(drawOpt,title,Drawing::HIST1D,hist,doPoissonErrors);
     if(doPoissonErrors){
-        return convertToPoisson(newDrawable);
+        return convertToPoisson(newDrawable,drawTrailingPoissonZeros);
     } else {
         return newDrawable;
     }
 }
-Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors) {
+Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors,
+        const bool drawTrailingPoissonZeros) {
     Drawable1D newDrawable;
     if(num.type == STACK || num.type == NONE) {
         newDrawable = num;
@@ -97,7 +99,8 @@ Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors) 
     } else if(num.type==HIST1D){
         TH1* hist = (TH1*)num.obj->Clone();
         if(num.drawOpt.Contains("E") && (num.doPoisson || doBinomErrors)){
-            auto * graph = doBinomErrors ? PlotTools::getBinomErrors(hist,den) :PlotTools::getRatioPoissonErrors(hist,den);
+            auto * graph = doBinomErrors ? PlotTools::getBinomErrors(hist,den) :
+                    PlotTools::getRatioPoissonErrors(hist,den,drawTrailingPoissonZeros);
             graph->SetLineColor  (hist->GetLineColor());
             graph->SetLineWidth  (hist->GetLineWidth());
             graph->SetLineStyle  (hist->GetLineStyle());
@@ -121,9 +124,10 @@ Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors) 
 }
 
 
-Drawable1D  makeRatio(TH1* num, const TH1 * den, TString title, TString drawOpt, bool doBinomErrors, bool doPoissonErrors){
+Drawable1D  makeRatio(TH1* num, const TH1 * den, TString title, TString drawOpt,
+        bool doBinomErrors, bool doPoissonErrors, const bool drawTrailingPoissonZeros){
     const Drawable1D newDrawable (drawOpt,title,HIST1D,num,doPoissonErrors);
-    return makeRatio(newDrawable,den,doBinomErrors);
+    return makeRatio(newDrawable,den,doBinomErrors,drawTrailingPoissonZeros);
 }
 
 double getMax(const Drawable1D& drawable){

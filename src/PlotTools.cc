@@ -120,10 +120,22 @@ namespace PlotTools {
       eD =  double(N)- L;
   }
 
-  TGraphAsymmErrors* getPoissonErrors(const TH1* h){
+  TGraphAsymmErrors* getPoissonErrors(const TH1* h,
+          const bool drawTrailingZeros){
       TGraphAsymmErrors* gr = new TGraphAsymmErrors();
+
+     int lastBin = h->GetNbinsX();
+     if(!drawTrailingZeros){
+         for(int iB = h->GetNbinsX(); iB > 0; --iB ){
+             if (h->GetBinContent(iB) > 0){
+                 lastBin = iB;
+                 break;
+             }
+         }
+     }
+
       int curPt = 0;
-      for(int ibin = 1; ibin <= h->GetNbinsX(); ++ibin){
+      for(int ibin = 1; ibin <= lastBin; ++ibin){
          int dN = h->GetBinContent(ibin);
          if(dN < 0) continue;
          double eU,eD;
@@ -140,10 +152,22 @@ namespace PlotTools {
     return gr;
   }
 
-  TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hD, const TH1* hM) {
+  TGraphAsymmErrors* getRatioPoissonErrors(const TH1* hD, const TH1* hM,
+          const bool drawTrailingZeros) {
       TGraphAsymmErrors* gr = new TGraphAsymmErrors();
+
+      int lastBin = hD->GetNbinsX();
+      if(!drawTrailingZeros){
+          for(int iB = hD->GetNbinsX(); iB > 0; --iB ){
+              if (hD->GetBinContent(iB) > 0){
+                  lastBin = iB;
+                  break;
+              }
+          }
+      }
+
       int curPt = 0;
-      for(int ibin = 1; ibin <= hD->GetNbinsX(); ++ibin){
+      for(int ibin = 1; ibin <= lastBin; ++ibin){
           int dN = hD->GetBinContent(ibin);
           if(dN < 0) continue;
           double mN = hM->GetBinContent(ibin);
