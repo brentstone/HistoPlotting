@@ -14,8 +14,6 @@
 
 #include "../include/Drawing.h"
 
-
-
 class Plotter{
 public:
   enum ErrorType {GAUS,POISSON, BINOM};
@@ -66,10 +64,18 @@ public:
   void turnOffLegend() {topStyle.drawLegend = false;}
 
 
-
-  void setCMSLumi(int cmsLumiPos = 33, TString lumiText = "35.9 fb^{-1} (13 TeV)",TString extraText = "", float extraTextOff = 1.6) {
-	  topStyle.addCMSLumi = true; topStyle.cmsLumiPos = cmsLumiPos; topStyle.lumiText = lumiText; topStyle.extraText = extraText;
+  void setCMSLumi(int year = 0, int cmsLumiPos = 33, TString lumiText = "N/A fb^{-1} (13 TeV)",TString extraText = "", float extraTextOff = 1.6) {
+	  topStyle.addCMSLumi = true; topStyle.cmsLumiPos = cmsLumiPos; topStyle.extraText = extraText;
 	  topStyle.extraTextOff= extraTextOff;
+	  if (year == 2016) {
+		  topStyle.lumiText = "35.9 fb^{-1} (13 TeV)";
+	  } else if (year == 2017) {
+		  topStyle.lumiText = "41.5 fb^{-1} (13 TeV)";
+	  } else if (year == 2018) {
+		  topStyle.lumiText = "59.7 fb^{-1} (13 TeV)";
+	  } else {
+		  topStyle.lumiText = lumiText;
+	  }
   }
 
   void setCMSLumiExtraText(TString extraText) { topStyle.extraText = extraText;}
