@@ -15,6 +15,11 @@ namespace PlotTools {
   void normalize  (TH1 * h);
   TH1* rebin      (TH1* h, int n);
   TH1* rebin      (TH1* h, int n, double * bins);
+  TH2* rebinX     (TH2* h, int n);
+  TH2* rebinY     (TH2* h, int n);
+  TH2* rebinX     (TH2* h, int n, double * bins);
+  TH2* rebinY     (TH2* h, int n, double * bins);
+  TH2* rebin2D    (TH2* h, TString name, TString title, int nx, double * xbins, int ny, double * ybins);
 
   //returns the size of the (lower,upper) error bars
   std::pair<double,double> getBinomError(const double num, const double den);

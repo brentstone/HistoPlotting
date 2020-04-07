@@ -67,6 +67,101 @@ namespace PlotTools {
     return h->Rebin(n,"",bins);
   }
 
+  TH2* rebinX(TH2* h, int n) {
+	  return h->RebinX(n);
+  }
+
+  TH2* rebinY(TH2* h, int n) {
+	  return h->RebinY(n);
+  }
+
+  TH2* rebinX(TH2* h, int n, double * bins) {
+	  TAxis *xax = h->GetXaxis();
+
+	  auto propErrors = [](float currE, float newE) -> float {
+		 return std::sqrt(currE*currE + newE*newE);
+	  };
+
+	  TH2 *hh = (TH2*)h->Clone();
+	  hh->Reset();
+	  hh->GetXaxis()->Set(n,bins);
+	  for(int j=1; j<=h->GetNbinsY(); j++) {
+		  int outBinY = j;
+
+		  for(int i=1; i<=h->GetNbinsX(); i++) {
+			  if(xax->GetBinCenter(i) < hh->GetXaxis()->GetBinLowEdge(1)) continue;
+			  int outBinX = hh->GetXaxis()->FindFixBin(xax->GetBinCenter(i));
+
+			  float cont = hh->GetBinContent(outBinX,outBinY);
+			  float err  = hh->GetBinError(outBinX,outBinY);
+
+			  hh->SetBinContent(outBinX,outBinY,cont+h->GetBinContent(i,j));
+			  hh->SetBinError(outBinX,outBinY,propErrors(err,h->GetBinError(i,j)));
+		  }
+	  }
+
+	  return hh;
+  }
+
+  TH2* rebinY(TH2* h, int n, double * bins) {
+	  TAxis *yax = h->GetYaxis();
+
+	  auto propErrors = [](float currE, float newE) -> float {
+		 return std::sqrt(currE*currE + newE*newE);
+	  };
+
+	  TH2 *hh = (TH2*)h->Clone();
+	  hh->Reset();
+	  hh->GetYaxis()->Set(n,bins);
+	  for(int i=1; i<=h->GetNbinsX(); i++) {
+		  int outBinX = i;
+
+		  for(int j=1; j<=h->GetNbinsY(); j++) {
+			  if(yax->GetBinCenter(j) < hh->GetYaxis()->GetBinLowEdge(1)) continue;
+			  int outBinY = hh->GetYaxis()->FindFixBin(yax->GetBinCenter(j));
+
+			  float cont = hh->GetBinContent(outBinX,outBinY);
+			  float err  = hh->GetBinError(outBinX,outBinY);
+
+			  hh->SetBinContent(outBinX,outBinY,cont+h->GetBinContent(i,j));
+			  hh->SetBinError(outBinX,outBinY,propErrors(err,h->GetBinError(i,j)));
+		  }
+	  }
+
+	  return hh;
+  }
+
+  TH2* rebin2D(TH2* h, TString name, TString title, int nx, double * xbins, int ny, double * ybins) {
+
+	  TH2* hn = new TH2F(name,title,nx,xbins,ny,ybins);
+	  hn->Sumw2();
+
+	  auto propErrors = [](float currE, float newE) -> float {
+		 return std::sqrt(currE*currE + newE*newE);
+	  };
+
+      for(int i=1; i<=h->GetNbinsX(); ++i) for(int j=1; j<=h->GetNbinsY(); ++j) {
+    	  if(h->GetXaxis()->GetBinLowEdge(i) < hn->GetXaxis()->GetBinLowEdge(1)) continue;
+    	  if(h->GetYaxis()->GetBinLowEdge(j) < hn->GetYaxis()->GetBinLowEdge(1)) continue;
+    	  if(h->GetXaxis()->GetBinUpEdge(i) > hn->GetXaxis()->GetBinUpEdge(nx)) continue;
+    	  if(h->GetYaxis()->GetBinUpEdge(j) > hn->GetYaxis()->GetBinUpEdge(ny)) continue;
+
+    	  float xval = h->GetXaxis()->GetBinCenter(i);
+    	  float yval = h->GetYaxis()->GetBinCenter(j);
+    	  float val  = h->GetBinContent(i,j);
+    	  float err  = h->GetBinError(i,j);
+
+    	  float currCont = hn->GetBinContent(hn->GetXaxis()->FindFixBin(xval),hn->GetYaxis()->FindFixBin(yval));
+    	  float currErr  = hn->GetBinError(hn->GetXaxis()->FindFixBin(xval),hn->GetYaxis()->FindFixBin(yval));
+
+    	  int outBinX = hn->GetXaxis()->FindFixBin(xval);
+    	  int outBinY = hn->GetYaxis()->FindFixBin(yval);
+    	  hn->SetBinContent(outBinX,outBinY,currCont+val);
+    	  hn->SetBinError(outBinX,outBinY,propErrors(currErr,err));
+      }
+      return hn;
+  }
+
   std::pair<double,double> getBinomError(const double num, const double den){
 	  const double eff = num/den;
 	  if(den < 1.0 || eff < 0.0 || eff > 1.0 ) return std::make_pair(0,0);
