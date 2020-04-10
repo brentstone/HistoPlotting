@@ -116,6 +116,8 @@ Drawable1D  makeRatio(const Drawable1D num, const TH1* den, bool doBinomErrors,
             hist->Divide(den);
             newDrawable.type = HIST1D;
             newDrawable.drawOpt = num.drawOpt;
+//            std::cout<<num.drawOpt<<std::endl;
+//            newDrawable.drawOpt = "XP";
             newDrawable.obj = hist;
         }
     }
