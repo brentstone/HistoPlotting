@@ -207,10 +207,11 @@ namespace PlotTools {
     return gr;
   }
   
-  void getPoissonErrors(const unsigned int N, double& eU, double& eD){
+  void getPoissonErrors(const double N, double& eU, double& eD){
       const double alpha = 1 - 0.6827;
       double L =  (N == 0) ? 0  : (ROOT::Math::gamma_quantile(alpha/2,N,1.));
-      double U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;
+//      double U =  ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;
+      double U = (N == 0) ? 0 : ROOT::Math::gamma_quantile_c(alpha/2,N+1,1) ;
       eU =  U - double(N);
       eD =  double(N)- L;
   }
@@ -231,7 +232,7 @@ namespace PlotTools {
 
       int curPt = 0;
       for(int ibin = 1; ibin <= lastBin; ++ibin){
-         int dN = h->GetBinContent(ibin);
+         double dN = h->GetBinContent(ibin);
          if(dN < 0) continue;
          double eU,eD;
          getPoissonErrors(dN,eU,eD);
@@ -270,8 +271,15 @@ namespace PlotTools {
           double eL = 0, eH = 0;
           gr->SetPoint(curPt, hD->GetBinCenter(ibin), double(dN)/mN);
           getRatioPoissonErrors(dN, mN, mE, eL, eH);
-          gr->SetPointEYhigh(curPt, eH);
-          gr->SetPointEYlow(curPt, eL);
+//          gr->SetPointEYhigh(curPt, eH);
+//          gr->SetPointEYlow(curPt, eL);
+          if(dN==0) {
+              gr->SetPointEYhigh(curPt, 0);
+              gr->SetPointEYlow(curPt, 0);
+          } else {
+              gr->SetPointEYhigh(curPt, eH);
+              gr->SetPointEYlow(curPt, eL);
+          }
           curPt++;
       }
     return gr;
